@@ -1,11 +1,10 @@
 #include <SPI.h>
-#include <CC1120_addr.h>
+#include "CC1120_addr.h"
 
 #define R_BIT           0x80
 #define SS_PIN          4
 
-uint8_t w ,w1, w2, w3;
-float freq;
+uint8_t w ,w1, w2, w3, freq;
 
 struct cc_status {
  uint8_t res : 4;
@@ -20,6 +19,7 @@ union cc_st ccstatus;
 
 SPISettings settings(1000000, MSBFIRST, SPI_MODE0);
 uint8_t readExtAddrSPI(uint8_t addr);
+// uint8_t readMARCSTATE();
 
 void setup() {
   pinMode(SS_PIN, OUTPUT);
@@ -31,66 +31,93 @@ void setup() {
   strobeSPI(SRES); //Reset chip
   strobeSPI(SIDLE); //Exit RX/TX, turn off frequency synthesizer and exit eWOR mode if applicable
   
+  Serial.println();
   Serial.print("MARCSTATE before first cfg: ");
-  Serial.print(readExtAddrSPI(MARCSTATE), BIN);
+  // Serial.println(readExtAddrSPI(MARCSTATE), BIN);
+  readMARCSTATE();
   configureCC1120();
   Serial.print("MARCSTATE after  first cfg: ");
-  Serial.println(readExtAddrSPI(MARCSTATE), BIN);
+  readMARCSTATE();
 }
 
 void loop() {
+  Serial.print("MARCSTATE before cfg:  ");
+  readMARCSTATE();
+
   configureCC1120();
   digitalWrite(SS_PIN, HIGH);
-  // put your main code here, to run repeatedly:
-  w = readExtAddrSPI(PARTNUMBER);
+
+  Serial.print("MARCSTATE after  cfg:  ");
+  readMARCSTATE();
+  
   Serial.print("PARTNUMBER: ");
-  Serial.println(w, HEX);
+  Serial.println(readExtAddrSPI(PARTNUMBER), HEX);
  
   Serial.print("PARTVERSION: ");
-  w = readExtAddrSPI(PARTVERSION);
-  Serial.println(w, HEX);
+  Serial.println(readExtAddrSPI(PARTVERSION), HEX);
 
-  Serial.print("MARCSTATE: ");
-  w = readExtAddrSPI(MARCSTATE);
-  Serial.println(w, BIN);
- 
   Serial.print("FREQ: ");
-  w1 = readExtAddrSPI(FREQ2);
-  w2 = readExtAddrSPI(FREQ1);
-  w3 = readExtAddrSPI(FREQ0);
-  freq = ((uint32_t)w1 << 16) | ((uint32_t)w2 << 8) | (uint32_t)w3;
+  freq = ((uint32_t)readExtAddrSPI(FREQ2) << 16) | ((uint32_t)readExtAddrSPI(FREQ1) << 8) | (uint32_t)readExtAddrSPI(FREQ0);
   Serial.println(freq, HEX);
   
   Serial.print("FS_CFG: ");
-  w = readSPI(FS_CFG);
-  Serial.println(w, HEX);
+  Serial.println(readSPI(FS_CFG), HEX);
   
   Serial.print("PA_CFG2: ");
-  w = readSPI(PA_CFG2);
-  Serial.println(w, HEX);
+  Serial.println(readSPI(PA_CFG2), HEX);
   
   for(int i=0; i<128; i++){
     for(uint32_t i=0; i<128; i++){
-      writeSPI(TXRX_FIFO, 1110011);
+      writeSPI(TXRX_FIFO, 0b1110011);
     }
-    Serial.print("MARCSTATE before STX: ");
-    w = readExtAddrSPI(MARCSTATE);
-    Serial.println(w, BIN);
+    Serial.print("MARCSTATE before STX:  ");
+    readMARCSTATE();
     
     strobeSPI(STX);  // Enable TX
     delay(10);
     
-    Serial.print("MARCSTATE after STX: ");
-    w = readExtAddrSPI(MARCSTATE);
-    Serial.println(w, BIN);
+    Serial.print("MARCSTATE after  STX:  ");
+    readMARCSTATE();
     
     strobeSPI(SIDLE); // Exit TX/RX, turn off frequency synthesizer and exit eWOR mode if applicable
     FIFOFlush();
-  }
 
-  w = readExtAddrSPI(MARCSTATE);
-  Serial.print("MARCSTATE:");
-  Serial.println(w, BIN);
+    delay(10);
+    Serial.print("MARCSTATE after SIDLE: ");
+    readMARCSTATE();
+  }
+}
+
+void readMARCSTATE(){
+  uint8_t value = readExtAddrSPI(MARCSTATE);
+  uint8_t mask = 0b11111;
+  uint8_t state = value & mask;
+
+  if(state == 0b00001){
+    Serial.print(value, BIN);
+    Serial.println(" , IDLE");
+  }
+  else if(state == 0b01101){
+    Serial.print(value, BIN);
+    Serial.println(" , RX");
+  }
+  else if(state == 0b01110){
+    Serial.print(value, BIN);
+    Serial.println(" , RX_END");
+  }
+  else if(state == 0b10011){
+    Serial.print("0");
+    Serial.print(value, BIN);
+    Serial.println(" , TX");
+  }
+  else if(state == 0b10100){
+    Serial.print("0");
+    Serial.print(value, BIN);
+    Serial.println(" , TX_END");
+  }
+  else{
+    Serial.println(value, BIN);
+  }
 }
 
 uint8_t readSPI(uint8_t addr) {
@@ -140,7 +167,7 @@ void writeExtAddrSPI(uint8_t addr, uint8_t value) {
 void configureCC1120() {
   // 430MHz帯での設定を行う
   uint32_t FREQ = (uint32_t)(0x6B8000);
-  Serial.print("FREQ in configration:");
+  Serial.print("FREQ in configration: ");
   Serial.println(FREQ, HEX);
   delay(100);
  
