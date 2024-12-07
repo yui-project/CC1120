@@ -1,12 +1,11 @@
 #include <SPI.h>
-
+#include <CC1120_addr.h>
 
 #define R_BIT           0x80
-#define EXT_ADDR        0x2F
 #define SS_PIN          4
-#define MARCSTATE       0x73 //MARCSTATE(通信機の状態)
 
-uint8_t w;
+uint8_t w ,w1, w2, w3;
+float freq;
 
 struct cc_status {
  uint8_t res : 4;
@@ -17,85 +16,81 @@ union cc_st {
   struct cc_status ccst;
   uint8_t v;
 };
-
 union cc_st ccstatus;
 
-SPISettings settings(1000, MSBFIRST, SPI_MODE0);
-
+SPISettings settings(1000000, MSBFIRST, SPI_MODE0);
 uint8_t readExtAddrSPI(uint8_t addr);
 
 void setup() {
   pinMode(SS_PIN, OUTPUT);
   digitalWrite(SS_PIN, HIGH);
-  // put your setup code here, to run once:
+ 
   Serial.begin(9600);
   SPI.begin();
-  // SPI.beginTransaction(SPISettings(500000, MSBFIRST, SPI_MODE0));
 
-  strobeSPI(0x30);  //Reset chip
-
+  strobeSPI(SRES); //Reset chip
+  strobeSPI(SIDLE); //Exit RX/TX, turn off frequency synthesizer and exit eWOR mode if applicable
   
-  strobeSPI(0x36); //Exit RX/TX, turn off frequency synthesizer and exit eWOR mode if applicable
-
+  Serial.print("MARCSTATE before first cfg: ");
+  Serial.print(readExtAddrSPI(MARCSTATE), BIN);
   configureCC1120();
-  w = readExtAddrSPI(MARCSTATE);
-  
-  Serial.print("MARCSTATE:");
-  Serial.println(w, BIN);
-
+  Serial.print("MARCSTATE after  first cfg: ");
+  Serial.println(readExtAddrSPI(MARCSTATE), BIN);
 }
 
 void loop() {
   configureCC1120();
   digitalWrite(SS_PIN, HIGH);
   // put your main code here, to run repeatedly:
-  w = readExtAddrSPI(0x8F);
-  Serial.print("PARTNUMBER:");
+  w = readExtAddrSPI(PARTNUMBER);
+  Serial.print("PARTNUMBER: ");
   Serial.println(w, HEX);
-  Serial.print("PARTVERSION:");
-  w = readExtAddrSPI(0x90);
+ 
+  Serial.print("PARTVERSION: ");
+  w = readExtAddrSPI(PARTVERSION);
   Serial.println(w, HEX);
-  Serial.print("MARCSTATE:");
+
+  Serial.print("MARCSTATE: ");
   w = readExtAddrSPI(MARCSTATE);
   Serial.println(w, BIN);
-  Serial.print("FREQ:");
-  w = readExtAddrSPI(0x0C);
-  Serial.print(w, HEX);
-  w = readExtAddrSPI(0x0D);
-  Serial.print(w, HEX);
-  w = readExtAddrSPI(0x0E);
+ 
+  Serial.print("FREQ: ");
+  w1 = readExtAddrSPI(FREQ2);
+  w2 = readExtAddrSPI(FREQ1);
+  w3 = readExtAddrSPI(FREQ0);
+  freq = ((uint32_t)w1 << 16) | ((uint32_t)w2 << 8) | (uint32_t)w3;
+  Serial.println(freq, HEX);
+  
+  Serial.print("FS_CFG: ");
+  w = readSPI(FS_CFG);
   Serial.println(w, HEX);
-  w = readSPI(0x21);
-  Serial.print("FS_CFG:");
+  
+  Serial.print("PA_CFG2: ");
+  w = readSPI(PA_CFG2);
   Serial.println(w, HEX);
-  w = readSPI(0x2B);
-  Serial.print("PA_CFG2:");
-  Serial.println(w, HEX);
+  
   for(int i=0; i<128; i++){
     for(uint32_t i=0; i<128; i++){
-      writeSPI(0x3F, 1110011);
+      writeSPI(TXRX_FIFO, 1110011);
     }
-    strobeSPI(0x35);  // Enable TX
-    delay(10);
-    Serial.print("MARCSTATE:");
+    Serial.print("MARCSTATE before STX: ");
     w = readExtAddrSPI(MARCSTATE);
     Serial.println(w, BIN);
-    strobeSPI(0x36);
+    
+    strobeSPI(STX);  // Enable TX
+    delay(10);
+    
+    Serial.print("MARCSTATE after STX: ");
+    w = readExtAddrSPI(MARCSTATE);
+    Serial.println(w, BIN);
+    
+    strobeSPI(SIDLE); // Exit TX/RX, turn off frequency synthesizer and exit eWOR mode if applicable
     FIFOFlush();
   }
-  // strobeSPI(0x35);
 
   w = readExtAddrSPI(MARCSTATE);
   Serial.print("MARCSTATE:");
   Serial.println(w, BIN);
-  
-  // delay(1000);  
-
-  // strobeSPI(0x36);
-
-  // FIFOFlush();
-
-  // delay(1000);
 }
 
 uint8_t readSPI(uint8_t addr) {
@@ -144,36 +139,26 @@ void writeExtAddrSPI(uint8_t addr, uint8_t value) {
 
 void configureCC1120() {
   // 430MHz帯での設定を行う
-
-  
-
-  uint32_t FREQ = (uint32_t) (437*pow(2, 11)*8);
-
+  uint32_t FREQ = (uint32_t)(0x6B8000);
+  Serial.print("FREQ in configration:");
   Serial.println(FREQ, HEX);
-  // Serial.println(FREQ >> 8, HEX);
-  // Serial.println(FREQ >> 16, HEX);
   delay(100);
  
-  //writeExtAddrSPI(0x0E, FREQ); // FREQ0の設定
-  //writeExtAddrSPI(0x0D, FREQ >> 8); // FREQ1の設定
-  //writeExtAddrSPI(0x0C, FREQ >> 16); // FREQ2の設定
-  writeExtAddrSPI(0x0C, FREQ >> 16); // FREQ2の設定
-  writeExtAddrSPI(0x0D, FREQ >> 8); // FREQ1の設定
-  writeExtAddrSPI(0x0E, FREQ); // FREQ0の設定
- 
-
-  writeSPI(0x2B, 0x3F); // PA_CFG2レジスタを設定  // 出力パワーを設定するレジスタです。
-  writeSPI(0x21, 0x14); //Frequency Synthesizer Configuration
-  writeSPI(0x0B, 0x23); //Modulation Format and Frequency Deviation Configuration
+  writeExtAddrSPI(FREQ2, FREQ >> 16); // FREQ2の設定
+  writeExtAddrSPI(FREQ1, FREQ >> 8); // FREQ1の設定
+  writeExtAddrSPI(FREQ0, FREQ); // FREQ0の設定
  
   // 必要な他のレジスタを適切に設定する
+  writeSPI(PA_CFG2, 0x3F); // PA_CFG2レジスタを設定  // 出力パワーを設定するレジスタです。
+  writeSPI(FS_CFG, 0x14); //Frequency Synthesizer Configuration
+  writeSPI(MODCFG_DEV_E, 0x23); //Modulation Format and Frequency Deviation Configuration
 
-  strobeSPI(0x33); //Calibrate frequency synthesizer and turn it off
+  strobeSPI(SCAL); //Calibrate frequency synthesizer and turn it off
 
   delay(100);
 }
 
 void FIFOFlush(){
-  strobeSPI(0x3A); // Flush the RX FIFO
-  strobeSPI(0x3B); // Flush the TX FIFO
+  strobeSPI(SFRX); // Flush the RX FIFO
+  strobeSPI(SFTX); // Flush the TX FIFO
 }
