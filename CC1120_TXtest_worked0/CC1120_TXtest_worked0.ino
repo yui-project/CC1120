@@ -4,7 +4,8 @@
 #define R_BIT           0x80
 #define SS_PIN          4
 
-uint8_t w ,w1, w2, w3, freq;
+uint8_t w;
+uint32_t freq;
 
 struct cc_status {
  uint8_t res : 4;
@@ -57,7 +58,7 @@ void loop() {
   Serial.println(readExtAddrSPI(PARTVERSION), HEX);
 
   Serial.print("FREQ: ");
-  freq = ((uint32_t)readExtAddrSPI(FREQ2) << 16) | ((uint32_t)readExtAddrSPI(FREQ1) << 8) | (uint32_t)readExtAddrSPI(FREQ0);
+  freq = readExtAddrSPI(FREQ2) << 16 | readExtAddrSPI(FREQ1) << 8 | readExtAddrSPI(FREQ0);
   Serial.println(freq, HEX);
   
   Serial.print("FS_CFG: ");
