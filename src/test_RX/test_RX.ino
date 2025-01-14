@@ -68,19 +68,19 @@ void loop() {
   Serial.println(readSPI(PA_CFG2), HEX);
  
   for(int i=0; i<128; i++){
-    for(uint32_t i=0; i<64; i++){
-      writeSPI(TXRX_FIFO, 0b11101011);
-    }
-    for(uint32_t i=0; i<64; i++){
-      writeSPI(TXRX_FIFO, 0b00000110);
-    }
-    Serial.print("MARCSTATE before STX:  ");
+    Serial.print("MARCSTATE before SRX:  ");
     readMARCSTATE();
    
-    strobeSPI(STX);  // Enable TX
+    strobeSPI(SRX);  // Enable RX
     delay(10);
+
+    uint8_t RX_byte = 0;
+    for(uint32_t i=0; i<128; i++){
+    RX_byte = readSPI(0b10111111);  // R/~W[7], Burst[6], RX_FIFO_Address[5:0]
+    Serial.println(RX_byte);
+    }
    
-    Serial.print("MARCSTATE after  STX:  ");
+    Serial.print("MARCSTATE after  SRX:  ");
     readMARCSTATE();
    
     strobeSPI(SIDLE); // Exit TX/RX, turn off frequency synthesizer and exit eWOR mode if applicable
