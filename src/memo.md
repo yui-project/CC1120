@@ -1,3 +1,5 @@
+# 各レジスタに入れる値一覧
+1/20日時点でこれ
 ~~~
 #define IOCFG3_val          0xB0
 #define IOCFG2_val          0x06

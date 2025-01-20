@@ -238,13 +238,14 @@ writeSPI(IOCFG2, 0x06);        // GPIO2 IO Pin Configuration
 writeSPI(IOCFG1, 0xB0);        // GPIO1 IO Pin Configuration
 writeSPI(IOCFG0, 0x40);        // GPIO0 IO Pin Configuration
 writeSPI(SYNC_CFG1, 0x0B);     // Sync Word Detection Configuration Reg. 1
-writeSPI(DEVIATION_M, 0x48);   // Frequency Deviation Configuration
+writeSPI(DEVIATION_M, 0x89);   // Frequency Deviation Configuration
+writeSPI(MODCFG_DEV_E, 0x01);   // Frequency Deviation Configuration
 writeSPI(DCFILT_CFG, 0x1C);    // Digital DC Removal Configuration
 writeSPI(PREAMBLE_CFG1, 0x18); // Preamble Length Configuration Reg. 1
 writeSPI(IQIC, 0xC6);          // Digital Image Channel Compensation Configuration
 writeSPI(CHAN_BW, 0x08);       // Channel Filter Configuration
 writeSPI(MDMCFG0, 0x05);       // General Modem Parameter Configuration Reg. 0
-writeSPI(SYMBOL_RATE2, 0x58);  // Symbol Rate Configuration Exponent and Mantissa [1..
+writeSPI(SYMBOL_RATE2, 0x48);  // Symbol Rate Configuration Exponent and Mantissa [1..
 writeSPI(SYMBOL_RATE1, 0x93);  // Symbol Rate Configuration Mantissa [15:8]
 writeSPI(SYMBOL_RATE0, 0x75);  // Symbol Rate Configuration Mantissa [7:0]
 writeSPI(AGC_REF, 0x20);       // AGC Reference Level Configuration
