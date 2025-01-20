@@ -72,12 +72,25 @@ void loop() {
     readMARCSTATE();
    
     strobeSPI(SRX);  // Enable RX
-    delay(10);
+    delay(100);
 
-    uint8_t RX_byte = 0;
+    uint8_t RXByte = 0;
+    while(RXByte < 15){
+      RXByte = readExtAddrSPI(FIFO_NUM_RXBYTES);
+      delay(1000);
+      Serial.println(RXByte);
+    }
+
+    uint8_t RXData = 1;
     for(uint32_t i=0; i<128; i++){
-    RX_byte = readSPI(0b10111111);  // R/~W[7], Burst[6], RX_FIFO_Address[5:0]
-    Serial.println(RX_byte);
+    RXByte = readExtAddrSPI(FIFO_NUM_RXBYTES);
+    if(RXByte < 1){
+      break;
+    }
+    RXData = readSPI(0b10111111);  // R/~W[7], Burst[6], RX_FIFO_Address[5:0]
+    Serial.println(RXData, HEX);
+    readMARCSTATE();
+    delay(1000);
     }
    
     Serial.print("MARCSTATE after  SRX:  ");
@@ -238,13 +251,14 @@ writeSPI(IOCFG2, 0x06);        // GPIO2 IO Pin Configuration
 writeSPI(IOCFG1, 0xB0);        // GPIO1 IO Pin Configuration
 writeSPI(IOCFG0, 0x40);        // GPIO0 IO Pin Configuration
 writeSPI(SYNC_CFG1, 0x0B);     // Sync Word Detection Configuration Reg. 1
-writeSPI(DEVIATION_M, 0x48);   // Frequency Deviation Configuration
+writeSPI(DEVIATION_M, 0x89);   // Frequency Deviation Configuration
+writeSPI(MODCFG_DEV_E, 0x01);   // Frequency Deviation Configuration
 writeSPI(DCFILT_CFG, 0x1C);    // Digital DC Removal Configuration
 writeSPI(PREAMBLE_CFG1, 0x18); // Preamble Length Configuration Reg. 1
 writeSPI(IQIC, 0xC6);          // Digital Image Channel Compensation Configuration
 writeSPI(CHAN_BW, 0x08);       // Channel Filter Configuration
 writeSPI(MDMCFG0, 0x05);       // General Modem Parameter Configuration Reg. 0
-writeSPI(SYMBOL_RATE2, 0x58);  // Symbol Rate Configuration Exponent and Mantissa [1..
+writeSPI(SYMBOL_RATE2, 0x48);  // Symbol Rate Configuration Exponent and Mantissa [1..
 writeSPI(SYMBOL_RATE1, 0x93);  // Symbol Rate Configuration Mantissa [15:8]
 writeSPI(SYMBOL_RATE0, 0x75);  // Symbol Rate Configuration Mantissa [7:0]
 writeSPI(AGC_REF, 0x20);       // AGC Reference Level Configuration
