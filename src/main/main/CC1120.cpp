@@ -254,7 +254,17 @@ int8_t CC1120Class::TX(uint32_t *payload, uint16_t len)
   }
 
   timer_start(250);
-  while(readExtAddrSPI(MARCSTATE) == 0b00110011){
+  while(readExtAddrSPI(MARCSTATE) != 0b00010110){
+    if(timeout())
+    {
+      ret = 0;
+    }
+  }
+
+  strobeSPI(SIDLE);
+
+  timer_start(250);
+  while(readExtAddrSPI(MARCSTATE) != 0b00110011){
     if(timeout())
     {
       goto END; //go to end of this function
@@ -262,7 +272,78 @@ int8_t CC1120Class::TX(uint32_t *payload, uint16_t len)
   }
 
   END:
-  strobeSPI(SIDLE);
   FIFOFlush();
+  return let;
+}
+
+uint8_t CC1120Class::*RX()
+{
   strobeSPI(SRX);
+
+  timer_start(250);
+  while(readExtAddrSPI(MARCSTATE) != 0b01101101){
+    if(timeout())
+    {
+      goto END; //go to end of this function
+    }
+  }
+
+  uint8_t RXByte = 0;
+  timer_start(250);
+  while(RXByte < 1){
+    RXByte = readExtAddrSPI(FIFO_NUM_RXBYTES);
+    if(timeout())
+    {
+      goto END; //go to end of this function
+    }
+  }
+
+  uint8_t DataLen = 0;
+  DataLen = readSPI(0b10111111);
+
+  uint8_t RXData[DataLen];
+  if(DataLen < 127)
+  {
+    for(int i=0; i<DataLen; i++)
+    {
+      RxData[i] = readSPI(0b10111111);
+    }
+  }
+  else if(DataLen > 127)
+  {
+    uint32_t index = 0;
+    while(DataLen > 0)
+    {
+      if(DataLen >= 127)
+      {
+        for(int i=0; i<127; i++)
+        {
+          RxData[index++] = readSPI(0b10111111);
+        }
+        DataLen -= 127;
+      }
+      else if(DataLen < 127)
+      {
+        for(int i=0; i<DataLen; i++)
+        {
+          RxData[index++] = readSPI(0b10111111);
+        }
+        DataLen = 0;
+      }
+    }
+  }
+  strobeSPI(SIDLE);
+
+  timer_start(250);
+  while(readExtAddrSPI(MARCSTATE) != 0b00110011){
+    if(timeout())
+    {
+      goto END; //go to end of this function
+    }
+  }
+
+  END:
+  FIFOFlush();
+
+  return RxData;
 }
