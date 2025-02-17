@@ -100,7 +100,7 @@ void loop() {
       break;
     }
     RXData = readSPI(0b10111111);  // R/~W[7], Burst[6], RX_FIFO_Address[5:0]
-    Serial.println(RXData, HEX);
+    Serial.println((char)RXData);
     readMARCSTATE();
     delay(100);
     }

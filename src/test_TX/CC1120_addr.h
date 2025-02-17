@@ -1,3 +1,6 @@
+#define FSK
+// #define CW
+
 //SPI Address Space
 #define IOCFG3                0x00
 #define IOCFG2                0x01
@@ -194,3 +197,360 @@
 #define NUM_RXBYTES           0xD7
 #define FIFO_NUM_TXBYTES      0xD8
 #define FIFO_NUM_RXBYTES      0xD9
+
+#ifdef CW
+  // Register values
+  #define IOCFG3_VALUE            0xB0
+  #define IOCFG2_VALUE            0x06
+  #define IOCFG1_VALUE            0xB0
+  #define IOCFG0_VALUE            0x40
+  #define SYNC3_VALUE             0x93
+  #define SYNC2_VALUE             0x0B
+  #define SYNC1_VALUE             0x51
+  #define SYNC0_VALUE             0xDE
+  #define SYNC_CFG1_VALUE         0x0B
+  #define SYNC_CFG0_VALUE         0x17
+  #define DEVIATION_M_VALUE       0x89
+  #define MODCFG_DEV_E_VALUE      0x19
+  #define DCFILT_CFG_VALUE        0x1C
+  #define PREAMBLE_CFG1_VALUE     0x18
+  #define PREAMBLE_CFG0_VALUE     0x2A
+  #define FREQ_IF_CFG_VALUE       0x40
+  #define IQIC_VALUE              0xC6
+  #define CHAN_BW_VALUE           0x08
+  #define MDMCFG1_VALUE           0x46
+  #define MDMCFG0_VALUE           0x05
+  #define SYMBOL_RATE2_VALUE      0x48
+  #define SYMBOL_RATE1_VALUE      0x93
+  #define SYMBOL_RATE0_VALUE      0x75
+  #define AGC_REF_VALUE           0x20
+  #define AGC_CS_THR_VALUE        0x19
+  #define AGC_GAIN_ADJUST_VALUE   0x00
+  #define AGC_CFG3_VALUE          0x91
+  #define AGC_CFG2_VALUE          0x20
+  #define AGC_CFG1_VALUE          0xA9
+  #define AGC_CFG0_VALUE          0xC3
+  #define FIFO_CFG_VALUE          0x00
+  #define DEV_ADDR_VALUE          0x00
+  #define SETTLING_CFG_VALUE      0x0B
+  #define FS_CFG_VALUE            0x14
+  #define WOR_CFG1_VALUE          0x08
+  #define WOR_CFG0_VALUE          0x21
+  #define WOR_EVENT0_MSB_VALUE    0x00
+  #define WOR_EVENT0_LSB_VALUE    0x00
+  #define PKT_CFG2_VALUE          0x04
+  #define PKT_CFG1_VALUE          0x15
+  #define PKT_CFG0_VALUE          0x20
+  #define RFEND_CFG1_VALUE        0x0F
+  #define RFEND_CFG0_VALUE        0x00
+  #define PA_CFG2_VALUE           0x7C
+  #define PA_CFG1_VALUE           0x56
+  #define PA_CFG0_VALUE           0x7E
+  #define PKT_LEN_VALUE           0xFF
+  #define IF_MIX_CFG_VALUE        0x00
+  #define FREQOFF_CFG_VALUE       0x22
+  #define TOC_CFG_VALUE           0x0B
+  #define MARC_SPARE_VALUE        0x00
+  #define ECG_CFG_VALUE           0x00
+  #define CFM_DATA_CFG_VALUE      0x00
+  #define EXT_CTRL_VALUE          0x01
+  #define RCCAL_FINE_VALUE        0x00
+  #define RCCAL_COARSE_VALUE      0x00
+  #define RCCAL_OFFSET_VALUE      0x00
+  #define FREQOFF1_VALUE          0x00
+  #define FREQOFF0_VALUE          0x00
+  #define FREQ2_VALUE             0x6D
+  #define FREQ1_VALUE             0x43
+  #define FREQ0_VALUE             0x33
+  #define IF_ADC2_VALUE           0x02
+  #define IF_ADC1_VALUE           0xA6
+  #define IF_ADC0_VALUE           0x04
+  #define FS_DIG1_VALUE           0x00
+  #define FS_DIG0_VALUE           0x5F
+  #define FS_CAL3_VALUE           0x00
+  #define FS_CAL2_VALUE           0x20
+  #define FS_CAL1_VALUE           0x40
+  #define FS_CAL0_VALUE           0x0E
+  #define FS_CHP_VALUE            0x28
+  #define FS_DIVTWO_VALUE         0x03
+  #define FS_DSM1_VALUE           0x00
+  #define FS_DSM0_VALUE           0x33
+  #define FS_DVC1_VALUE           0xFF
+  #define FS_DVC0_VALUE           0x17
+  #define FS_LBI_VALUE            0x00
+  #define FS_PFD_VALUE            0x50
+  #define FS_PRE_VALUE            0x6E
+  #define FS_REG_DIV_CML_VALUE    0x14
+  #define FS_SPARE_VALUE          0xAC
+  #define FS_VCO4_VALUE           0x14
+  #define FS_VCO3_VALUE           0x00
+  #define FS_VCO2_VALUE           0x00
+  #define FS_VCO1_VALUE           0x00
+  #define FS_VCO0_VALUE           0xB4
+  #define GBIAS6_VALUE            0x00
+  #define GBIAS5_VALUE            0x02
+  #define GBIAS4_VALUE            0x00
+  #define GBIAS3_VALUE            0x00
+  #define GBIAS2_VALUE            0x10
+  #define GBIAS1_VALUE            0x00
+  #define GBIAS0_VALUE            0x00
+  #define IFAMP_VALUE             0x01
+  #define LNA_VALUE               0x01
+  #define RXMIX_VALUE             0x01
+  #define XOSC5_VALUE             0x0E
+  #define XOSC4_VALUE             0xA0
+  #define XOSC3_VALUE             0x03
+  #define XOSC2_VALUE             0x04
+  #define XOSC1_VALUE             0x03
+  #define XOSC0_VALUE             0x00
+  #define ANALOG_SPARE_VALUE      0x00
+  #define PA_CFG3_VALUE           0x00
+  #define WOR_TIME1_VALUE         0x00
+  #define WOR_TIME0_VALUE         0x00
+  #define WOR_CAPTURE1_VALUE      0x00
+  #define WOR_CAPTURE0_VALUE      0x00
+  #define BIST_VALUE              0x00
+  #define DCFILTOFFSET_I1_VALUE   0x00
+  #define DCFILTOFFSET_I0_VALUE   0x00
+  #define DCFILTOFFSET_Q1_VALUE   0x00
+  #define DCFILTOFFSET_Q0_VALUE   0x00
+  #define IQIE_I1_VALUE           0x00
+  #define IQIE_I0_VALUE           0x00
+  #define IQIE_Q1_VALUE           0x00
+  #define IQIE_Q0_VALUE           0x00
+  #define RSSI1_VALUE             0x80
+  #define RSSI0_VALUE             0x00
+  #define MARCSTATE_VALUE         0x41
+  #define LQI_VAL_VALUE           0x00
+  #define PQT_SYNC_ERR_VALUE      0xFF
+  #define DEM_STATUS_VALUE        0x00
+  #define FREQOFF_EST1_VALUE      0x00
+  #define FREQOFF_EST0_VALUE      0x00
+  #define AGC_GAIN3_VALUE         0x00
+  #define AGC_GAIN2_VALUE         0xD1
+  #define AGC_GAIN1_VALUE         0x00
+  #define AGC_GAIN0_VALUE         0x3F
+  #define CFM_RX_DATA_OUT_VALUE   0x00
+  #define CFM_TX_DATA_IN_VALUE    0x00
+  #define ASK_SOFT_RX_DATA_VALUE  0x30
+  #define RNDGEN_VALUE            0x7F
+  #define MAGN2_VALUE             0x00
+  #define MAGN1_VALUE             0x00
+  #define MAGN0_VALUE             0x00
+  #define ANG1_VALUE              0x00
+  #define ANG0_VALUE              0x00
+  #define CHFILT_I2_VALUE         0x08
+  #define CHFILT_I1_VALUE         0x00
+  #define CHFILT_I0_VALUE         0x00
+  #define CHFILT_Q2_VALUE         0x00
+  #define CHFILT_Q1_VALUE         0x00
+  #define CHFILT_Q0_VALUE         0x00
+  #define GPIO_STATUS_VALUE       0x00
+  #define FSCAL_CTRL_VALUE        0x01
+  #define PHASE_ADJUST_VALUE      0x00
+  #define PARTNUMBER_VALUE        0x48
+  #define PARTVERSION_VALUE       0x23
+  #define SERIAL_STATUS_VALUE     0x00
+  #define MODEM_STATUS1_VALUE     0x10
+  #define MODEM_STATUS0_VALUE     0x00
+  #define MARC_STATUS1_VALUE      0x00
+  #define MARC_STATUS0_VALUE      0x00
+  #define PA_IFAMP_TEST_VALUE     0x00
+  #define FSRF_TEST_VALUE         0x00
+  #define PRE_TEST_VALUE          0x00
+  #define PRE_OVR_VALUE           0x00
+  #define ADC_TEST_VALUE          0x00
+  #define DVC_TEST_VALUE          0x0B
+  #define ATEST_VALUE             0x40
+  #define ATEST_LVDS_VALUE        0x00
+  #define ATEST_MODE_VALUE        0x00
+  #define XOSC_TEST1_VALUE        0x3C
+  #define XOSC_TEST0_VALUE        0x00
+  #define RXFIRST_VALUE           0x00
+  #define TXFIRST_VALUE           0x00
+  #define RXLAST_VALUE            0x00
+  #define TXLAST_VALUE            0x00
+  #define NUM_TXBYTES_VALUE       0x00
+  #define NUM_RXBYTES_VALUE       0x00
+  #define FIFO_NUM_TXBYTES_VALUE  0x0F
+  #define FIFO_NUM_RXBYTES_VALUE  0x00
+#endif
+
+#ifdef FSK
+// Register values
+#define IOCFG3_VALUE            0xB0
+#define IOCFG2_VALUE            0x06
+#define IOCFG1_VALUE            0xB0
+#define IOCFG0_VALUE            0x40
+#define SYNC3_VALUE             0x93
+#define SYNC2_VALUE             0x0B
+#define SYNC1_VALUE             0x51
+#define SYNC0_VALUE             0xDE
+#define SYNC_CFG1_VALUE         0x0B
+#define SYNC_CFG0_VALUE         0x17
+#define DEVIATION_M_VALUE       0x89
+#define MODCFG_DEV_E_VALUE      0x01
+#define DCFILT_CFG_VALUE        0x1C
+#define PREAMBLE_CFG1_VALUE     0x18
+#define PREAMBLE_CFG0_VALUE     0x2A
+#define FREQ_IF_CFG_VALUE       0x40
+#define IQIC_VALUE              0xC6
+#define CHAN_BW_VALUE           0x08
+#define MDMCFG1_VALUE           0x46
+#define MDMCFG0_VALUE           0x05
+#define SYMBOL_RATE2_VALUE      0x48
+#define SYMBOL_RATE1_VALUE      0x93
+#define SYMBOL_RATE0_VALUE      0x75
+#define AGC_REF_VALUE           0x20
+#define AGC_CS_THR_VALUE        0x19
+#define AGC_GAIN_ADJUST_VALUE   0x00
+#define AGC_CFG3_VALUE          0x91
+#define AGC_CFG2_VALUE          0x20
+#define AGC_CFG1_VALUE          0xA9
+#define AGC_CFG0_VALUE          0xCF
+#define FIFO_CFG_VALUE          0x00
+#define DEV_ADDR_VALUE          0x00
+#define SETTLING_CFG_VALUE      0x03
+#define FS_CFG_VALUE            0x14
+#define WOR_CFG1_VALUE          0x08
+#define WOR_CFG0_VALUE          0x21
+#define WOR_EVENT0_MSB_VALUE    0x00
+#define WOR_EVENT0_LSB_VALUE    0x00
+#define PKT_CFG2_VALUE          0x04
+#define PKT_CFG1_VALUE          0x05
+#define PKT_CFG0_VALUE          0x20
+#define RFEND_CFG1_VALUE        0x0F
+#define RFEND_CFG0_VALUE        0x00
+#define PA_CFG2_VALUE           0x7F
+#define PA_CFG1_VALUE           0x56
+#define PA_CFG0_VALUE           0x7E
+#define PKT_LEN_VALUE           0xFF
+#define IF_MIX_CFG_VALUE        0x00
+#define FREQOFF_CFG_VALUE       0x22
+#define TOC_CFG_VALUE           0x0B
+#define MARC_SPARE_VALUE        0x00
+#define ECG_CFG_VALUE           0x00
+#define CFM_DATA_CFG_VALUE      0x00
+#define EXT_CTRL_VALUE          0x01
+#define RCCAL_FINE_VALUE        0x00
+#define RCCAL_COARSE_VALUE      0x00
+#define RCCAL_OFFSET_VALUE      0x00
+#define FREQOFF1_VALUE          0x00
+#define FREQOFF0_VALUE          0x00
+#define FREQ2_VALUE             0x6D
+#define FREQ1_VALUE             0x43
+#define FREQ0_VALUE             0x33
+#define IF_ADC2_VALUE           0x02
+#define IF_ADC1_VALUE           0xA6
+#define IF_ADC0_VALUE           0x04
+#define FS_DIG1_VALUE           0x00
+#define FS_DIG0_VALUE           0x5F
+#define FS_CAL3_VALUE           0x00
+#define FS_CAL2_VALUE           0x20
+#define FS_CAL1_VALUE           0x40
+#define FS_CAL0_VALUE           0x0E
+#define FS_CHP_VALUE            0x28
+#define FS_DIVTWO_VALUE         0x03
+#define FS_DSM1_VALUE           0x00
+#define FS_DSM0_VALUE           0x33
+#define FS_DVC1_VALUE           0xFF
+#define FS_DVC0_VALUE           0x17
+#define FS_LBI_VALUE            0x00
+#define FS_PFD_VALUE            0x50
+#define FS_PRE_VALUE            0x6E
+#define FS_REG_DIV_CML_VALUE    0x14
+#define FS_SPARE_VALUE          0xAC
+#define FS_VCO4_VALUE           0x14
+#define FS_VCO3_VALUE           0x00
+#define FS_VCO2_VALUE           0x00
+#define FS_VCO1_VALUE           0x00
+#define FS_VCO0_VALUE           0xB4
+#define GBIAS6_VALUE            0x00
+#define GBIAS5_VALUE            0x02
+#define GBIAS4_VALUE            0x00
+#define GBIAS3_VALUE            0x00
+#define GBIAS2_VALUE            0x10
+#define GBIAS1_VALUE            0x00
+#define GBIAS0_VALUE            0x00
+#define IFAMP_VALUE             0x01
+#define LNA_VALUE               0x01
+#define RXMIX_VALUE             0x01
+#define XOSC5_VALUE             0x0E
+#define XOSC4_VALUE             0xA0
+#define XOSC3_VALUE             0x03
+#define XOSC2_VALUE             0x04
+#define XOSC1_VALUE             0x03
+#define XOSC0_VALUE             0x00
+#define ANALOG_SPARE_VALUE      0x00
+#define PA_CFG3_VALUE           0x00
+#define WOR_TIME1_VALUE         0x00
+#define WOR_TIME0_VALUE         0x00
+#define WOR_CAPTURE1_VALUE      0x00
+#define WOR_CAPTURE0_VALUE      0x00
+#define BIST_VALUE              0x00
+#define DCFILTOFFSET_I1_VALUE   0x00
+#define DCFILTOFFSET_I0_VALUE   0x00
+#define DCFILTOFFSET_Q1_VALUE   0x00
+#define DCFILTOFFSET_Q0_VALUE   0x00
+#define IQIE_I1_VALUE           0x00
+#define IQIE_I0_VALUE           0x00
+#define IQIE_Q1_VALUE           0x00
+#define IQIE_Q0_VALUE           0x00
+#define RSSI1_VALUE             0x80
+#define RSSI0_VALUE             0x00
+#define MARCSTATE_VALUE         0x41
+#define LQI_VAL_VALUE           0x00
+#define PQT_SYNC_ERR_VALUE      0xFF
+#define DEM_STATUS_VALUE        0x00
+#define FREQOFF_EST1_VALUE      0x00
+#define FREQOFF_EST0_VALUE      0x00
+#define AGC_GAIN3_VALUE         0x00
+#define AGC_GAIN2_VALUE         0xD1
+#define AGC_GAIN1_VALUE         0x00
+#define AGC_GAIN0_VALUE         0x3F
+#define CFM_RX_DATA_OUT_VALUE   0x00
+#define CFM_TX_DATA_IN_VALUE    0x00
+#define ASK_SOFT_RX_DATA_VALUE  0x30
+#define RNDGEN_VALUE            0x7F
+#define MAGN2_VALUE             0x00
+#define MAGN1_VALUE             0x00
+#define MAGN0_VALUE             0x00
+#define ANG1_VALUE              0x00
+#define ANG0_VALUE              0x00
+#define CHFILT_I2_VALUE         0x08
+#define CHFILT_I1_VALUE         0x00
+#define CHFILT_I0_VALUE         0x00
+#define CHFILT_Q2_VALUE         0x00
+#define CHFILT_Q1_VALUE         0x00
+#define CHFILT_Q0_VALUE         0x00
+#define GPIO_STATUS_VALUE       0x00
+#define FSCAL_CTRL_VALUE        0x01
+#define PHASE_ADJUST_VALUE      0x00
+#define PARTNUMBER_VALUE        0x48
+#define PARTVERSION_VALUE       0x21
+#define SERIAL_STATUS_VALUE     0x00
+#define MODEM_STATUS1_VALUE     0x10
+#define MODEM_STATUS0_VALUE     0x00
+#define MARC_STATUS1_VALUE      0x00
+#define MARC_STATUS0_VALUE      0x00
+#define PA_IFAMP_TEST_VALUE     0x00
+#define FSRF_TEST_VALUE         0x00
+#define PRE_TEST_VALUE          0x00
+#define PRE_OVR_VALUE           0x00
+#define ADC_TEST_VALUE          0x00
+#define DVC_TEST_VALUE          0x0B
+#define ATEST_VALUE             0x40
+#define ATEST_LVDS_VALUE        0x00
+#define ATEST_MODE_VALUE        0x00
+#define XOSC_TEST1_VALUE        0x3C
+#define XOSC_TEST0_VALUE        0x00
+#define RXFIRST_VALUE           0x00
+#define TXFIRST_VALUE           0x00
+#define RXLAST_VALUE            0x00
+#define TXLAST_VALUE            0x00
+#define NUM_TXBYTES_VALUE       0x00
+#define NUM_RXBYTES_VALUE       0x00
+#define FIFO_NUM_TXBYTES_VALUE  0x0F
+#define FIFO_NUM_RXBYTES_VALUE  0x00
+
+#endif
