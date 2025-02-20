@@ -410,7 +410,7 @@
 #define AGC_CFG0_VALUE          0xCF
 #define FIFO_CFG_VALUE          0x00
 #define DEV_ADDR_VALUE          0x00
-#define SETTLING_CFG_VALUE      0x03
+#define SETTLING_CFG_VALUE      0x0B
 #define FS_CFG_VALUE            0x14
 #define WOR_CFG1_VALUE          0x08
 #define WOR_CFG0_VALUE          0x21
@@ -438,8 +438,8 @@
 #define FREQOFF1_VALUE          0x00
 #define FREQOFF0_VALUE          0x00
 #define FREQ2_VALUE             0x6D
-#define FREQ1_VALUE             0x43
-#define FREQ0_VALUE             0x33
+#define FREQ1_VALUE             0x42
+#define FREQ0_VALUE             0xF1
 #define IF_ADC2_VALUE           0x02
 #define IF_ADC1_VALUE           0xA6
 #define IF_ADC0_VALUE           0x04
@@ -527,7 +527,7 @@
 #define FSCAL_CTRL_VALUE        0x01
 #define PHASE_ADJUST_VALUE      0x00
 #define PARTNUMBER_VALUE        0x48
-#define PARTVERSION_VALUE       0x21
+#define PARTVERSION_VALUE       0x23
 #define SERIAL_STATUS_VALUE     0x00
 #define MODEM_STATUS1_VALUE     0x10
 #define MODEM_STATUS0_VALUE     0x00

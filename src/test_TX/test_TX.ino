@@ -22,7 +22,7 @@ union cc_st {
 };
 union cc_st ccstatus;
  
-SPISettings settings(1000000, MSBFIRST, SPI_MODE0);
+SPISettings settings(100000, MSBFIRST, SPI_MODE0);
 uint8_t readExtAddrSPI(uint8_t addr);
 // uint8_t readMARCSTATE();
  
@@ -81,29 +81,33 @@ void loop() {
  
   char buffer[128];
   int index = 0;
-  while (!Serial.available()){
+  while (Serial.available() == 0){
     delay(10);
   }
-  while (Serial.available()) {
+  while (Serial.available()>0) {
     buffer[index] = Serial.read();
     index++;
     //バッファ以上の場合は中断
-    if (index >= 128) {
-      break;
-    }
+    // if (index >= 128) {
+    //   break;
+    // }
   }
 
-  for(int i=0; i<4; i++){
+  for(int i=0; i<20; i++){
     for(uint32_t i=0; i<index; i++){
       writeSPI(TXRX_FIFO, buffer[i]);
-      
+      Serial.print(buffer[i]);
 
     }
+
+    // for(int i=0; i<128; i++){
+    //   Serial.print(readDirectFIFO(i));
+    // }
     Serial.print("MARCSTATE before STX:  ");
     readMARCSTATE();
    
     strobeSPI(STX);  // Enable TX
-    delay(3000);
+    delay(1000);
    
     Serial.print("MARCSTATE after  STX:  ");
     readMARCSTATE();
@@ -116,6 +120,8 @@ void loop() {
     readMARCSTATE();
   }
 }
+
+
  
 void readMARCSTATE(){
   uint8_t value = readExtAddrSPI(MARCSTATE);
@@ -150,25 +156,31 @@ void readMARCSTATE(){
 }
  
 uint8_t readSPI(uint8_t addr) {
+  SPI5.beginTransaction(settings);
   digitalWrite(SS_PIN, LOW);
   ccstatus.v = SPI5.transfer(R_BIT | addr);
   uint8_t v = SPI5.transfer(0x00);
   digitalWrite(SS_PIN, HIGH);
+  SPI5.endTransaction();
   return v;
 }
  
 void writeSPI(uint8_t addr, uint8_t value) {
+  SPI5.beginTransaction(settings);
   digitalWrite(SS_PIN, LOW);
   ccstatus.v = SPI5.transfer(addr);
   ccstatus.v = SPI5.transfer(value);
   digitalWrite(SS_PIN, HIGH);
+  SPI5.endTransaction();
 }
  
 void strobeSPI(uint8_t cmd)
 {
+  SPI5.beginTransaction(settings);
   digitalWrite(SS_PIN, LOW);
   ccstatus.v = SPI5.transfer(R_BIT | cmd);
   digitalWrite(SS_PIN, HIGH);
+  SPI5.endTransaction();
 }
  
 uint8_t readExtAddrSPI(uint8_t addr) {
@@ -186,11 +198,37 @@ uint8_t readExtAddrSPI(uint8_t addr) {
 }
  
 void writeExtAddrSPI(uint8_t addr, uint8_t value) {
+  SPI5.beginTransaction(settings);
   digitalWrite(SS_PIN, LOW);
   ccstatus.v = SPI5.transfer(EXT_ADDR);
   ccstatus.v = SPI5.transfer(addr);
   ccstatus.v = SPI5.transfer(value);
   digitalWrite(SS_PIN, HIGH);
+  SPI5.endTransaction();
+}
+
+uint8_t readDirectFIFO(uint8_t addr) {
+  static uint8_t v;
+  SPI5.beginTransaction(settings);
+  digitalWrite(SS_PIN, LOW);
+  ccstatus.v = SPI5.transfer(DIRECT_MEMORY_ACCESS);
+  SPI5.transfer(addr);
+  delayMicroseconds(10);
+  v = SPI5.transfer(0xff);
+  // Serial.println(SPI5.transfer(0xff), BIN);
+  digitalWrite(SS_PIN, HIGH);
+  SPI5.endTransaction();
+  return v;
+}
+ 
+void writeDirectFIFO(uint8_t addr, uint8_t value) {
+  SPI5.beginTransaction(settings);
+  digitalWrite(SS_PIN, LOW);
+  ccstatus.v = SPI5.transfer(DIRECT_MEMORY_ACCESS);
+  ccstatus.v = SPI5.transfer(addr);
+  ccstatus.v = SPI5.transfer(value);
+  digitalWrite(SS_PIN, HIGH);
+  SPI5.endTransaction();
 }
  
 /*void configureCC1120() {
