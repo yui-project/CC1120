@@ -396,7 +396,7 @@
 #define FREQ_IF_CFG_VALUE       0x40
 #define IQIC_VALUE              0xC6
 #define CHAN_BW_VALUE           0x08
-#define MDMCFG1_VALUE           0x46
+#define MDMCFG1_VALUE           0x66
 #define MDMCFG0_VALUE           0x05
 #define SYMBOL_RATE2_VALUE      0x48
 #define SYMBOL_RATE1_VALUE      0x93
@@ -417,7 +417,7 @@
 #define WOR_EVENT0_MSB_VALUE    0x00
 #define WOR_EVENT0_LSB_VALUE    0x00
 #define PKT_CFG2_VALUE          0x04
-#define PKT_CFG1_VALUE          0x05
+#define PKT_CFG1_VALUE          0x45
 #define PKT_CFG0_VALUE          0x20
 #define RFEND_CFG1_VALUE        0x0F
 #define RFEND_CFG0_VALUE        0x00
@@ -526,10 +526,10 @@
 #define GPIO_STATUS_VALUE       0x00
 #define FSCAL_CTRL_VALUE        0x01
 #define PHASE_ADJUST_VALUE      0x00
-#define PARTNUMBER_VALUE        0x48
-#define PARTVERSION_VALUE       0x23
+#define PARTNUMBER_VALUE        0x00
+#define PARTVERSION_VALUE       0x00
 #define SERIAL_STATUS_VALUE     0x00
-#define MODEM_STATUS1_VALUE     0x10
+#define MODEM_STATUS1_VALUE     0x01
 #define MODEM_STATUS0_VALUE     0x00
 #define MARC_STATUS1_VALUE      0x00
 #define MARC_STATUS0_VALUE      0x00

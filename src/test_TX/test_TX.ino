@@ -84,31 +84,40 @@ void loop() {
   Serial.println(readSPI(PA_CFG2), HEX);
  
   char buffer[128];
-  int index = 0;
+  int index = 1;
   while (Serial.available() == 0){
     delay(10);
   }
   while (Serial.available()>0) {
     buffer[index] = Serial.read();
     index++;
-    delay(1);
+    delay(10);
     //バッファ以上の場合は中断
     // if (index >= 128) {
     //   break;
     // }
   }
+  // index--;
 
-  for(int i=0; i<20; i++){
+  buffer[0] = index-2;
+
+  for(int i=0; i<1; i++){
     FIFOFlush();
     
+
+
     for(uint32_t i=0; i<index; i++){
       writeSPI(TXRX_FIFO, buffer[i]);
       Serial.print(buffer[i]);
 
     }
 
-    Serial.println(readExtAddrSPI(TXFIRST), HEX);
-    Serial.println(readExtAddrSPI(TXLAST), HEX);
+
+    Serial.println(index);
+    Serial.println(readExtAddrSPI(TXFIRST));
+    Serial.println(readExtAddrSPI(TXLAST));
+    writeExtAddrSPI(TXLAST, index);
+    Serial.println(readExtAddrSPI(TXLAST));
     Serial.println(readSPI(PKT_LEN));
     writeSPI(PKT_LEN, index);
     Serial.println(readSPI(PKT_LEN));
