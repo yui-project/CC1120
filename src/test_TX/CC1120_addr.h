@@ -438,8 +438,8 @@
 #define FREQOFF1_VALUE          0x00
 #define FREQOFF0_VALUE          0x00
 #define FREQ2_VALUE             0x6D
-#define FREQ1_VALUE             0x42
-#define FREQ0_VALUE             0xF1
+#define FREQ1_VALUE             0x43
+#define FREQ0_VALUE             0x33
 #define IF_ADC2_VALUE           0x02
 #define IF_ADC1_VALUE           0xA6
 #define IF_ADC0_VALUE           0x04
