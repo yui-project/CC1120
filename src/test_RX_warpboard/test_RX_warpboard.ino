@@ -2,7 +2,7 @@
 #include "CC1120_addr.h"
  
 #define CC1120_R_BIT           0x80
-#define CC1120_SS_PIN          20
+#define CC1120_SS_PIN          4
 #define LoRa_PIN        21
 #define DECA_PIN        19
 #define DECB_PIN        25
@@ -42,7 +42,7 @@ void setup() {
   digitalWrite(DECC_PIN, HIGH);
  
   Serial.begin(9600);
-  SPI5.begin();
+  SPI.begin();
  
   strobeSPI(SRES); //Reset chip
   strobeSPI(SIDLE); //Exit RX/TX, turn off frequency synthesizer and exit eWOR mode if applicable
@@ -90,9 +90,9 @@ void loop() {
     delay(100);
 
     uint8_t RXByte = 0;
-    while(RXByte < 1){
+    while(RXByte < 4){
       RXByte = readExtAddrSPI(NUM_RXBYTES);
-      delay(500);
+      delay(1000);
       // Serial.println(RXByte);
     }
 
@@ -105,16 +105,16 @@ void loop() {
       if(RXByte < 1){
         break;
       }
-      // Serial.print("CRC check:");
+      Serial.print("CRC check:");
       if((readExtAddrSPI(LQI_VAL) & 0b10000000) == 0b10000000) {
         CRCCheck = 1;
-        // Serial.println("OK!");
+        Serial.println("OK!");
       }
-      // else Serial.println(readExtAddrSPI(LQI_VAL));
+      else Serial.println(readExtAddrSPI(LQI_VAL));
       RXData = readSPI(0b10111111);  // R/~W[7], Burst[6], RX_FIFO_Address[5:0]
       
       // Serial.print("Received Data:");
-      // if((RXByte > 2) && (RXByte < 127)) Serial.print((char)RXData);
+      if((RXByte > 2) && (RXByte < 127)) Serial.print((char)RXData);
       // Serial.println((char)RXData);
       // readMARCSTATE();
       delay(1);
@@ -130,7 +130,7 @@ void loop() {
     Serial.print("loop:");
     Serial.println(loopCount);
     Serial.print("error late:");
-    Serial.println((float)errorCount/loopCount);
+    Serial.println(errorCount/loopCount);
 
    
     Serial.print("MARCSTATE after  SRX:  ");
@@ -179,45 +179,45 @@ void readMARCSTATE(){
  
 uint8_t readSPI(uint8_t addr) {
   digitalWrite(CC1120_SS_PIN, LOW);
-  ccstatus.v = SPI5.transfer(CC1120_R_BIT | addr);
-  uint8_t v = SPI5.transfer(0x00);
+  ccstatus.v = SPI.transfer(CC1120_R_BIT | addr);
+  uint8_t v = SPI.transfer(0x00);
   digitalWrite(CC1120_SS_PIN, HIGH);
   return v;
 }
  
 void writeSPI(uint8_t addr, uint8_t value) {
   digitalWrite(CC1120_SS_PIN, LOW);
-  ccstatus.v = SPI5.transfer(addr);
-  ccstatus.v = SPI5.transfer(value);
+  ccstatus.v = SPI.transfer(addr);
+  ccstatus.v = SPI.transfer(value);
   digitalWrite(CC1120_SS_PIN, HIGH);
 }
  
 void strobeSPI(uint8_t cmd)
 {
   digitalWrite(CC1120_SS_PIN, LOW);
-  ccstatus.v = SPI5.transfer(CC1120_R_BIT | cmd);
+  ccstatus.v = SPI.transfer(CC1120_R_BIT | cmd);
   digitalWrite(CC1120_SS_PIN, HIGH);
 }
  
 uint8_t readExtAddrSPI(uint8_t addr) {
   static uint8_t v;
-  SPI5.beginTransaction(settings);
+  SPI.beginTransaction(settings);
   digitalWrite(CC1120_SS_PIN, LOW);
-  ccstatus.v = SPI5.transfer(CC1120_R_BIT | EXT_ADDR);
-  SPI5.transfer(addr);
+  ccstatus.v = SPI.transfer(CC1120_R_BIT | EXT_ADDR);
+  SPI.transfer(addr);
   delayMicroseconds(10);
-  v = SPI5.transfer(0xff);
-  // Serial.println(SPI5.transfer(0xff), BIN);
+  v = SPI.transfer(0xff);
+  // Serial.println(SPI.transfer(0xff), BIN);
   digitalWrite(CC1120_SS_PIN, HIGH);
-  SPI5.endTransaction();
+  SPI.endTransaction();
   return v;
 }
  
 void writeExtAddrSPI(uint8_t addr, uint8_t value) {
   digitalWrite(CC1120_SS_PIN, LOW);
-  ccstatus.v = SPI5.transfer(EXT_ADDR);
-  ccstatus.v = SPI5.transfer(addr);
-  ccstatus.v = SPI5.transfer(value);
+  ccstatus.v = SPI.transfer(EXT_ADDR);
+  ccstatus.v = SPI.transfer(addr);
+  ccstatus.v = SPI.transfer(value);
   digitalWrite(CC1120_SS_PIN, HIGH);
 }
  
