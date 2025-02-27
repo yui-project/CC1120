@@ -84,22 +84,28 @@ void loop() {
   Serial.println(readSPI(PA_CFG2), HEX);
  
   char buffer[128];
-  int index = 1;
-  while (Serial.available() == 0){
-    delay(10);
-  }
-  while (Serial.available()>0) {
-    buffer[index] = Serial.read();
+  int index = 2;
+  // while (Serial.available() == 0){
+  //   delay(10);
+  // }
+  // while (Serial.available()>0) {
+  //   buffer[index] = Serial.read();
+  //   index++;
+  //   delay(10);
+  //   //バッファ以上の場合は中断
+  //   // if (index >= 128) {
+  //   //   break;
+  //   // }
+  // }
+  // // index--;
+  int randLen = random(126);
+  for(int i=0; i<randLen; i++){
+    buffer[i] = (char)random(128);
     index++;
-    delay(10);
-    //バッファ以上の場合は中断
-    // if (index >= 128) {
-    //   break;
-    // }
   }
-  // index--;
 
   buffer[0] = index-2;
+  buffer[1] = 0x55;
 
   for(int i=0; i<1; i++){
     FIFOFlush();
@@ -140,7 +146,7 @@ void loop() {
     strobeSPI(SIDLE); // Exit TX/RX, turn off frequency synthesizer and exit eWOR mode if applicable
     
  
-    delay(10);
+    delay(1000);
     Serial.print("MARCSTATE after SIDLE: ");
     readMARCSTATE();
   }

@@ -25,6 +25,9 @@ union cc_st ccstatus;
 SPISettings settings(1000000, MSBFIRST, SPI_MODE0);
 uint8_t readExtAddrSPI(uint8_t addr);
 // uint8_t readMARCSTATE();
+
+uint32_t loopCount = 0;
+uint32_t errorCount = 0;
  
 void setup() {
   pinMode(CC1120_SS_PIN, OUTPUT);
@@ -94,19 +97,41 @@ void loop() {
     }
 
     uint8_t RXData = 1;
+    bool CRCCheck = 0;
     for(uint32_t i=0; i<128; i++){
       RXByte = readExtAddrSPI(NUM_RXBYTES);
-      Serial.print(RXByte);
+      // Serial.print("Remaining bytes:");
+      // Serial.println(RXByte);
       if(RXByte < 1){
         break;
       }
-      Serial.print(readExtAddrSPI(LQI_VAL), BIN);
+      Serial.print("CRC check:");
+      if((readExtAddrSPI(LQI_VAL) & 0b10000000) == 0b10000000) {
+        CRCCheck = 1;
+        Serial.println("OK!");
+      }
+      else Serial.println(readExtAddrSPI(LQI_VAL));
       RXData = readSPI(0b10111111);  // R/~W[7], Burst[6], RX_FIFO_Address[5:0]
-      Serial.println((char)RXData);
+      
+      // Serial.print("Received Data:");
+      if((RXByte > 2) && (RXByte < 127)) Serial.print((char)RXData);
+      // Serial.println((char)RXData);
       // readMARCSTATE();
-      delay(100);
+      delay(1);
     }
+    if(CRCCheck == 0){
+      errorCount++;
+    }
+    CRCCheck = 0;
+    loopCount++;
     Serial.println();
+    Serial.print("error:");
+    Serial.println(errorCount);
+    Serial.print("loop:");
+    Serial.println(loopCount);
+    Serial.print("error late:");
+    Serial.println(errorCount/loopCount);
+
    
     Serial.print("MARCSTATE after  SRX:  ");
     readMARCSTATE();
