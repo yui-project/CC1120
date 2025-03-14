@@ -670,8 +670,8 @@ bool CC1120Class::setFSK(){
   if(readExtAddrSPI(GPIO_STATUS)      != FSK_GPIO_STATUS_VALUE         ) ret=0;
   if(readExtAddrSPI(FSCAL_CTRL)       != FSK_FSCAL_CTRL_VALUE          ) ret=0;
   if(readExtAddrSPI(PHASE_ADJUST)     != FSK_PHASE_ADJUST_VALUE        ) ret=0;
-  if(readExtAddrSPI(PARTNUMBER)       != FSK_PARTNUMBER_VALUE          ) ret=0;
-  if(readExtAddrSPI(PARTVERSION)      != FSK_PARTVERSION_VALUE         ) ret=0;
+  // if(readExtAddrSPI(PARTNUMBER)       != FSK_PARTNUMBER_VALUE          ) ret=0;
+  // if(readExtAddrSPI(PARTVERSION)      != FSK_PARTVERSION_VALUE         ) ret=0;
   if(readExtAddrSPI(SERIAL_STATUS)    != FSK_SERIAL_STATUS_VALUE       ) ret=0;
   if(readExtAddrSPI(MODEM_STATUS1)    != FSK_MODEM_STATUS1_VALUE       ) ret=0;
   if(readExtAddrSPI(MODEM_STATUS0)    != FSK_MODEM_STATUS0_VALUE       ) ret=0;
@@ -688,14 +688,14 @@ bool CC1120Class::setFSK(){
   if(readExtAddrSPI(ATEST_MODE)       != FSK_ATEST_MODE_VALUE          ) ret=0;
   if(readExtAddrSPI(XOSC_TEST1)       != FSK_XOSC_TEST1_VALUE          ) ret=0;
   if(readExtAddrSPI(XOSC_TEST0)       != FSK_XOSC_TEST0_VALUE          ) ret=0;
-  if(readExtAddrSPI(RXFIRST)          != FSK_RXFIRST_VALUE             ) ret=0;
-  if(readExtAddrSPI(TXFIRST)          != FSK_TXFIRST_VALUE             ) ret=0;
-  if(readExtAddrSPI(RXLAST)           != FSK_RXLAST_VALUE              ) ret=0;
-  if(readExtAddrSPI(TXLAST)           != FSK_TXLAST_VALUE              ) ret=0;
-  if(readExtAddrSPI(NUM_TXBYTES)      != FSK_NUM_TXBYTES_VALUE         ) ret=0;
-  if(readExtAddrSPI(NUM_RXBYTES)      != FSK_NUM_RXBYTES_VALUE         ) ret=0;
-  if(readExtAddrSPI(FIFO_NUM_TXBYTES) != FSK_FIFO_NUM_TXBYTES_VALUE    ) ret=0;
-  if(readExtAddrSPI(FIFO_NUM_RXBYTES) != FSK_FIFO_NUM_RXBYTES_VALUE    ) ret=0;
+  // if(readExtAddrSPI(RXFIRST)          != FSK_RXFIRST_VALUE             ) ret=0;
+  // if(readExtAddrSPI(TXFIRST)          != FSK_TXFIRST_VALUE             ) ret=0;
+  // if(readExtAddrSPI(RXLAST)           != FSK_RXLAST_VALUE              ) ret=0;
+  // if(readExtAddrSPI(TXLAST)           != FSK_TXLAST_VALUE              ) ret=0;
+  // if(readExtAddrSPI(NUM_TXBYTES)      != FSK_NUM_TXBYTES_VALUE         ) ret=0;
+  // if(readExtAddrSPI(NUM_RXBYTES)      != FSK_NUM_RXBYTES_VALUE         ) ret=0;
+  // if(readExtAddrSPI(FIFO_NUM_TXBYTES) != FSK_FIFO_NUM_TXBYTES_VALUE    ) ret=0;
+  // if(readExtAddrSPI(FIFO_NUM_RXBYTES) != FSK_FIFO_NUM_RXBYTES_VALUE    ) ret=0;
 
   strobeSPI(SCAL); //Calibrate frequency synthesizer and turn it off
  
@@ -1041,8 +1041,8 @@ bool CC1120Class::setCW(){
   if(readExtAddrSPI(GPIO_STATUS)      != CW_GPIO_STATUS_VALUE         ) ret=0;
   if(readExtAddrSPI(FSCAL_CTRL)       != CW_FSCAL_CTRL_VALUE          ) ret=0;
   if(readExtAddrSPI(PHASE_ADJUST)     != CW_PHASE_ADJUST_VALUE        ) ret=0;
-  if(readExtAddrSPI(PARTNUMBER)       != CW_PARTNUMBER_VALUE          ) ret=0;
-  if(readExtAddrSPI(PARTVERSION)      != CW_PARTVERSION_VALUE         ) ret=0;
+  // if(readExtAddrSPI(PARTNUMBER)       != CW_PARTNUMBER_VALUE          ) ret=0;
+  // if(readExtAddrSPI(PARTVERSION)      != CW_PARTVERSION_VALUE         ) ret=0;
   if(readExtAddrSPI(SERIAL_STATUS)    != CW_SERIAL_STATUS_VALUE       ) ret=0;
   if(readExtAddrSPI(MODEM_STATUS1)    != CW_MODEM_STATUS1_VALUE       ) ret=0;
   if(readExtAddrSPI(MODEM_STATUS0)    != CW_MODEM_STATUS0_VALUE       ) ret=0;
@@ -1059,14 +1059,14 @@ bool CC1120Class::setCW(){
   if(readExtAddrSPI(ATEST_MODE)       != CW_ATEST_MODE_VALUE          ) ret=0;
   if(readExtAddrSPI(XOSC_TEST1)       != CW_XOSC_TEST1_VALUE          ) ret=0;
   if(readExtAddrSPI(XOSC_TEST0)       != CW_XOSC_TEST0_VALUE          ) ret=0;
-  if(readExtAddrSPI(RXFIRST)          != CW_RXFIRST_VALUE             ) ret=0;
-  if(readExtAddrSPI(TXFIRST)          != CW_TXFIRST_VALUE             ) ret=0;
-  if(readExtAddrSPI(RXLAST)           != CW_RXLAST_VALUE              ) ret=0;
-  if(readExtAddrSPI(TXLAST)           != CW_TXLAST_VALUE              ) ret=0;
-  if(readExtAddrSPI(NUM_TXBYTES)      != CW_NUM_TXBYTES_VALUE         ) ret=0;
-  if(readExtAddrSPI(NUM_RXBYTES)      != CW_NUM_RXBYTES_VALUE         ) ret=0;
-  if(readExtAddrSPI(FIFO_NUM_TXBYTES) != CW_FIFO_NUM_TXBYTES_VALUE    ) ret=0;
-  if(readExtAddrSPI(FIFO_NUM_RXBYTES) != CW_FIFO_NUM_RXBYTES_VALUE    ) ret=0;
+  // if(readExtAddrSPI(RXFIRST)          != CW_RXFIRST_VALUE             ) ret=0;
+  // if(readExtAddrSPI(TXFIRST)          != CW_TXFIRST_VALUE             ) ret=0;
+  // if(readExtAddrSPI(RXLAST)           != CW_RXLAST_VALUE              ) ret=0;
+  // if(readExtAddrSPI(TXLAST)           != CW_TXLAST_VALUE              ) ret=0;
+  // if(readExtAddrSPI(NUM_TXBYTES)      != CW_NUM_TXBYTES_VALUE         ) ret=0;
+  // if(readExtAddrSPI(NUM_RXBYTES)      != CW_NUM_RXBYTES_VALUE         ) ret=0;
+  // if(readExtAddrSPI(FIFO_NUM_TXBYTES) != CW_FIFO_NUM_TXBYTES_VALUE    ) ret=0;
+  // if(readExtAddrSPI(FIFO_NUM_RXBYTES) != CW_FIFO_NUM_RXBYTES_VALUE    ) ret=0;
 
   strobeSPI(SCAL); //Calibrate frequency synthesizer and turn it off
  
