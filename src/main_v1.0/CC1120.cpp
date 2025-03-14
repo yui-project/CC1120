@@ -1,8 +1,10 @@
 #include "stdint.h"
 #include "CC1120.h"
+#include "SpiFram.h"
 #include <SPI.h>
 
 SPISettings settings(100000, MSBFIRST, SPI_MODE0);
+SpiFram FRAM;
 
 bool CC1120Class::begin(){
   reset();
@@ -63,6 +65,17 @@ bool CC1120Class::sendDL(uint8_t data){
 
 bool CC1120Class::recvUL(uint8_t *cmd){
   RX(cmd, 28);
+}
+
+bool CC1120Class::sendDLfromFram(uint64_t start, uint64_t end){
+  uint64_t len = end-start+1;
+  uint8_t payload[len];
+  FRAM.begin();
+  for(uint64_t i=0; i<=len; i++){
+    payload[i] = (uint8_t)FRAM.read(start+i);
+  }
+  begin();
+  TX(payload, len);
 }
 
 bool CC1120Class::TX(uint8_t *payload, uint16_t len)
