@@ -16,9 +16,11 @@
 #define DECB_SS_PIN           25
 #define DECC_SS_PIN           22
 
-#define MARCSTATE_IDLE 0b01000001
+#define MARCSTATE_IDLE        0b01000001
+#define MARCSTATE_RX          0b01101101
+#define MARCSTATE_TXFIFOERROR 0b00010110
 
-SPISettings settings(100000, MSBFIRST, SPI_MODE0);
+
 
 class CC1120Class
 {
@@ -26,11 +28,11 @@ class CC1120Class
     bool    begin();
     bool    calibration();
     bool    setRegister(bool extAddr, uint8_t addr, uint8_t value);
-    uint32_t *showResister();
+    uint8_t showResister(uint8_t *data);
     bool    sendDL(uint8_t data);
-    uint32_t *recvUL()
-    int8_t  TX(uint32_t *payload, uint16_t len);
-    uint32_t *RX();
+    bool    recvUL(uint8_t *cmd);
+    bool    TX(uint8_t *payload, uint16_t len);
+    bool    RX(uint8_t *data, uint16_t limit=0);
     bool    IDLE();
     bool    setFSK();
     bool    setCW();
@@ -47,6 +49,9 @@ class CC1120Class
     bool    FIFOFlush();
     uint8_t marcstate();
     bool    waitIDLE(bool ret, uint32_t time);
+    bool    waitRX(bool ret, uint32_t time);
+    bool    waitTXFIFOERROR(bool ret, uint32_t time);
+    void    reset();
 
     uint32_t timerTime;
     uint32_t waitTime = 1000;
@@ -282,7 +287,7 @@ class CC1120Class
 #define CW_AGC_CFG1_VALUE          0x32
 #define CW_AGC_CFG0_VALUE          0x9F
 #define CW_FIFO_CFG_VALUE          0x00
-#define CW_DEV_ADDR_VALUE          0x00
+#define CW_DEV_ADDR_VALUE          0x55
 #define CW_SETTLING_CFG_VALUE      0x0B
 #define CW_FS_CFG_VALUE            0x12
 #define CW_WOR_CFG1_VALUE          0x08
