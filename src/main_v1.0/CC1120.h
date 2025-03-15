@@ -45,6 +45,8 @@ class CC1120Class
     void    strobeSPI(uint8_t cmd);
     uint8_t readExtAddrSPI(uint8_t addr);
     void    writeExtAddrSPI(uint8_t addr, uint8_t value);
+    uint8_t readFIFO(uint8_t addr);
+    void    writeFIFO(uint8_t addr, uint8_t value);
     void    timerStart(uint32_t time);
     bool    timeout();
     bool    FIFOFlush();

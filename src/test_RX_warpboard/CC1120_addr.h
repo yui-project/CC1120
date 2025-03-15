@@ -1,4 +1,4 @@
-// #define FSK
+#define FSK
 
 #ifndef FSK
 #define CW

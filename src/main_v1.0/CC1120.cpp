@@ -1,3 +1,4 @@
+#include "HardwareSerial.h"
 #include "stdint.h"
 #include "CC1120.h"
 #include "SpiFram.h"
@@ -7,10 +8,11 @@ SPISettings settings(100000, MSBFIRST, SPI_MODE0);
 SpiFram FRAM;
 
 bool CC1120Class::begin(){
+  bool ret = 1;
   reset();
-  CC1120_SERIAL.begin(9600);
+  // CC1120_SERIAL.begin(9600);
   CC1120_SPI.begin();
-  IDLE();
+  ret = IDLE();
 
   pinMode(CC1120_SS_PIN, OUTPUT);
   pinMode(LoRa_SS_PIN, OUTPUT);
@@ -25,7 +27,11 @@ bool CC1120Class::begin(){
 
   digitalWrite(CC1120_SS_PIN, HIGH);
 
-  setFSK();
+  // Serial.print("IDLE");
+  // Serial.println(ret);
+  ret = setFSK();
+  Serial.println("FSK");
+  return ret;
 }
 
 bool CC1120Class::calibration(){
@@ -60,7 +66,11 @@ bool CC1120Class::IDLE(){
 }
 
 bool CC1120Class::sendDL(uint8_t data){
-  TX(&data, 1);
+  bool ret = 1;
+  Serial.println(data);
+  Serial.println((uint32_t)&data);
+  ret = TX(&data, 1);
+  return ret;
 }
 
 bool CC1120Class::recvUL(uint8_t *cmd){
@@ -81,63 +91,86 @@ bool CC1120Class::sendDLfromFram(uint64_t start, uint64_t end){
 bool CC1120Class::TX(uint8_t *payload, uint16_t len)
 {
   bool ret = 1;
+  len++;
+  writeSPI(TXRX_FIFO, len);
+  Serial.print("len: ");
+  Serial.println(readFIFO(0x00));
+  writeSPI(TXRX_FIFO, 0x55);
+  Serial.print("addr: 0x");
+  Serial.println(readFIFO(0x01), HEX);
 
-  uint32_t remainingSize = len+2;
-  payload[0] = remainingSize;
-  payload[1] = 0x55;
+  Serial.println("TX");
+  Serial.println(len);
 
-  if(len < 126)
-  {
-    for(uint32_t i=2; i<128; i++)
+  // if(len <= 126)
+  // {
+    for(uint32_t i=0; i<len; i++)
     {
       writeSPI(TXRX_FIFO, payload[i]);
+      Serial.print("payload");
+      Serial.print(i);
+      Serial.print(": ");
+      Serial.println(readFIFO(i+2));
     }
     strobeSPI(STX);
-  }
-  else if(len > 126)
-  {
-    uint32_t index = 0;
+  // }
+  // else if(len > 126)
+  // {
+  //   uint32_t index = 0;
 
-    for(uint32_t i=0; i<126; i++)
-      {
-        writeSPI(TXRX_FIFO, payload[index++]);
-      }
+  //   for(uint32_t i=0; i<126; i++)
+  //     {
+  //       writeSPI(TXRX_FIFO, payload[index++]);
+  //       Serial.print("payload");
+  //       Serial.print(i);
+  //       Serial.print(": ");
+  //       Serial.println(readFIFO(i+2));
+  //     }
     
-    remainingSize -=128;
+  //   len -= 126;
+  //   Serial.println(len);
 
-    strobeSPI(STX);
+  //   strobeSPI(STX);
 
-    do
-    {
-      if(readExtAddrSPI(NUM_TXBYTES) < 15)
-      {
-        if(remainingSize > 64)
-        {
-          for(int i=0; i<64; i++)
-          {
-            writeSPI(TXRX_FIFO, payload[index++]);
-          }
-          remainingSize -= 64;
-        }
+  //   Serial.println(readExtAddrSPI(NUM_TXBYTES));
+  //   delay(10);
+  //   Serial.println(readExtAddrSPI(NUM_TXBYTES));
 
-        else if (remainingSize > 0)
-        {
-          for(int i=0; i<remainingSize; i++)
-          {
-            writeSPI(TXRX_FIFO, payload[index++]);
-          }
-          remainingSize = 0;
-        }
-      }
-    } while(remainingSize > 0);   
+  //   while(true)
+  //   {
+  //     Serial.println(readExtAddrSPI(NUM_TXBYTES));
+  //     Serial.println(marcstate(), BIN);
+  //     Serial.println(len);
+  //     if(readExtAddrSPI(NUM_TXBYTES) > 64)
+  //     {
+  //       Serial.println("DA");
+  //       if(len>0){
+  //         writeSPI(TXRX_FIFO, payload[index++]);
+  //         len--;
+  //       }
+  //       else{
+  //         break;
+  //       }
+  //     }
+  //   }
 
-  }
+  // }
+
+  Serial.println(marcstate(), BIN);
+
+  delay(100);
+
+  Serial.println(marcstate(), BIN);
+
+  delay(1000);
+
+  Serial.println(marcstate(), BIN);
 
   ret = waitTXFIFOERROR(ret, waitTime);
 
-  strobeSPI(SIDLE);
+  // strobeSPI(SIDLE);
 
-  ret = waitIDLE(ret, waitTime);
+  // ret = waitIDLE(ret, waitTime);
 
   FIFOFlush();
   return ret;
@@ -153,11 +186,14 @@ bool CC1120Class::RX(uint8_t *data, uint16_t limit=0)
   ret = waitRX(ret, waitTime);
 
   uint8_t RXByte = 0;
-  timerStart(250);
+  timerStart(1000);
   while(RXByte < 1){
     RXByte = readExtAddrSPI(NUM_RXBYTES);
+    // delay(10);
+    Serial.println(RXByte);
     if(timeout())
     {
+      ret = 0;
       goto END; //go to end of this function
     }
   }
@@ -168,44 +204,44 @@ bool CC1120Class::RX(uint8_t *data, uint16_t limit=0)
   }
   DataAddr = readSPI(0b10111111);
 
-  DataLen-=2;
+  DataLen-=1;
 
-  if(DataLen < 127)
-  {
+  // if(DataLen < 127)
+  // {
     for(int i=0; i<DataLen; i++)
     {
       data[i] = readSPI(0b10111111);
     }
-  }
-  else if(DataLen > 127)
-  {
-    uint32_t index = 0;
-    while(DataLen > 0)
-    {
-      if(DataLen >= 127)
-      {
-        for(int i=0; i<127; i++)
-        {
-          data[index++] = readSPI(0b10111111);
-        }
-        DataLen -= 127;
-      }
-      else if(DataLen < 127)
-      {
-        for(int i=0; i<DataLen; i++)
-        {
-          data[index++] = readSPI(0b10111111);
-        }
-        DataLen = 0;
-      }
-    }
-  }
+  // }
+  // else if(DataLen > 127)
+  // {
+  //   uint32_t index = 0;
+  //   while(DataLen > 0)
+  //   {
+  //     if(DataLen >= 127)
+  //     {
+  //       for(int i=0; i<127; i++)
+  //       {
+  //         data[index++] = readSPI(0b10111111);
+  //       }
+  //       DataLen -= 127;
+  //     }
+  //     else if(DataLen < 127)
+  //     {
+  //       for(int i=0; i<DataLen; i++)
+  //       {
+  //         data[index++] = readSPI(0b10111111);
+  //       }
+  //       DataLen = 0;
+  //     }
+  //   }
+  // }
   
   strobeSPI(SIDLE);
 
-  ret = waitIDLE(ret, timerTime);
-
   END:
+
+  ret = waitIDLE(ret, waitTime);
 
   FIFOFlush();
 
@@ -223,13 +259,14 @@ bool CC1120Class::RX(uint8_t *data, uint16_t limit=0)
 
 
 uint8_t CC1120Class::readSPI(uint8_t addr) {
+  Serial.println("reading SPI");
   CC1120_SPI.beginTransaction(settings);
   digitalWrite(CC1120_SS_PIN, LOW);
   CC1120_SPI.transfer(CC1120_R_BIT | addr);
   uint8_t v = CC1120_SPI.transfer(0x00);
   digitalWrite(CC1120_SS_PIN, HIGH);
-  return v;
   CC1120_SPI.endTransaction();
+  return v;
 }
  
 void CC1120Class::writeSPI(uint8_t addr, uint8_t value) {
@@ -276,6 +313,32 @@ void CC1120Class::writeExtAddrSPI(uint8_t addr, uint8_t value) {
   CC1120_SPI.endTransaction();
 }
 
+uint8_t CC1120Class::readFIFO(uint8_t addr){
+  CC1120_SPI.beginTransaction(settings);
+  static uint8_t v;
+  // CC1120_SPI.beginTransaction(settings);
+  digitalWrite(CC1120_SS_PIN, LOW);
+  CC1120_SPI.transfer(0b10111110);
+  CC1120_SPI.transfer(addr);
+  delayMicroseconds(10);
+  v = CC1120_SPI.transfer(0xff);
+  // Serial.println(CC1120_SPI.transfer(0xff), BIN);
+  digitalWrite(CC1120_SS_PIN, HIGH);
+  CC1120_SPI.endTransaction();
+  return v;
+}
+
+void CC1120Class::writeFIFO(uint8_t addr, uint8_t value){
+  CC1120_SPI.beginTransaction(settings);
+  int v;
+  digitalWrite(CC1120_SS_PIN, LOW);
+  v = CC1120_SPI.transfer(0b10111110);
+  v = CC1120_SPI.transfer(addr);
+  v = CC1120_SPI.transfer(value);
+  digitalWrite(CC1120_SS_PIN, HIGH);
+  CC1120_SPI.endTransaction();
+}
+
 void CC1120Class::timerStart(uint32_t time)
 {
   timerTime = millis() + time;
@@ -290,8 +353,10 @@ bool CC1120Class::timeout()
 }
 
 bool CC1120Class::waitIDLE(bool ret, uint32_t time){
+  Serial.println("waiting IDLE");
   timerStart(time);
   while(marcstate() != MARCSTATE_IDLE){
+    // Serial.println(marcstate());
     if(timeout()){
       ret = 0;
       break;
@@ -312,6 +377,7 @@ bool CC1120Class::waitRX(bool ret, uint32_t time){
 }
 
 bool CC1120Class::waitTXFIFOERROR(bool ret, uint32_t time){
+  Serial.println("waiting TX_FIFO_ERROR");
   timerStart(time);
   while(marcstate() != MARCSTATE_TXFIFOERROR){
     if(timeout()){
@@ -353,6 +419,7 @@ void CC1120Class::reset(){
 
 
 bool CC1120Class::setFSK(){
+  Serial.println("Setting registers (FSK)...");
   writeSPI(IOCFG3, FSK_IOCFG3_VALUE);
   writeSPI(IOCFG2, FSK_IOCFG2_VALUE);
   writeSPI(IOCFG1, FSK_IOCFG1_VALUE);
@@ -528,7 +595,7 @@ bool CC1120Class::setFSK(){
   // writeExtAddrSPI(FIFO_NUM_TXBYTES, FIFO_NUM_TXBYTES_VALUE);
   // writeExtAddrSPI(FIFO_NUM_RXBYTES, FIFO_NUM_RXBYTES_VALUE);
 
-
+  Serial.print("Checking registers .");
 
   bool ret = 1;
 
@@ -580,7 +647,7 @@ bool CC1120Class::setFSK(){
   if(readSPI(PA_CFG0)          != FSK_PA_CFG0_VALUE             ) ret=0;
   if(readSPI(PKT_LEN)          != FSK_PKT_LEN_VALUE             ) ret=0;
 
-
+  Serial.print(".");
 
   if(readExtAddrSPI(IF_MIX_CFG)       != FSK_IF_MIX_CFG_VALUE          ) ret=0;
   if(readExtAddrSPI(FREQOFF_CFG)      != FSK_FREQOFF_CFG_VALUE         ) ret=0;
@@ -709,17 +776,12 @@ bool CC1120Class::setFSK(){
   // if(readExtAddrSPI(NUM_RXBYTES)      != FSK_NUM_RXBYTES_VALUE         ) ret=0;
   // if(readExtAddrSPI(FIFO_NUM_TXBYTES) != FSK_FIFO_NUM_TXBYTES_VALUE    ) ret=0;
   // if(readExtAddrSPI(FIFO_NUM_RXBYTES) != FSK_FIFO_NUM_RXBYTES_VALUE    ) ret=0;
+  Serial.println(".");
 
+  Serial.println("Calibrating...");
   strobeSPI(SCAL); //Calibrate frequency synthesizer and turn it off
  
-  timerStart(1000);
-
-  while(marcstate() != MARCSTATE_IDLE){
-    if(timeout()){
-      ret = 0;
-      break;
-    }
-  }
+  ret = waitIDLE(ret, waitTime);
   return ret;
 }
 
