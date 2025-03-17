@@ -32,7 +32,7 @@ class CC1120Class
     bool    sendDL(uint8_t data);
     bool    recvUL(uint8_t *cmd);
     bool    sendDLfromFram(uint64_t start, uint64_t end);
-    bool    TX(uint8_t *payload, uint16_t len);
+    bool    TX(uint8_t *payload, int32_t len);
     bool    RX(uint8_t *data, uint16_t limit=0);
     bool    IDLE();
     bool    setFSK();
@@ -54,10 +54,11 @@ class CC1120Class
     bool    waitIDLE(bool ret, uint32_t time);
     bool    waitRX(bool ret, uint32_t time);
     bool    waitTXFIFOERROR(bool ret, uint32_t time);
+    bool    waitIDLEorTXFIFOERROR(bool ret, uint32_t time);
     void    reset();
 
     uint32_t timerTime;
-    uint32_t waitTime = 1000;
+    uint32_t waitTime = 3000;
 };
 
 //SPI Address Space

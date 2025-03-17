@@ -88,91 +88,66 @@ bool CC1120Class::sendDLfromFram(uint64_t start, uint64_t end){
   TX(payload, len);
 }
 
-bool CC1120Class::TX(uint8_t *payload, uint16_t len)
+bool CC1120Class::TX(uint8_t *payload, int32_t len)
 {
   bool ret = 1;
   len++;
-  writeSPI(TXRX_FIFO, len);
-  Serial.print("len: ");
-  Serial.println(readFIFO(0x00));
-  writeSPI(TXRX_FIFO, 0x55);
-  Serial.print("addr: 0x");
-  Serial.println(readFIFO(0x01), HEX);
 
   Serial.println("TX");
   Serial.println(len);
+  int32_t index=0;
 
-  // if(len <= 126)
-  // {
-    for(uint32_t i=0; i<len; i++)
+  while(len>0){
+    writeSPI(TXRX_FIFO, (uint8_t) min(len, 125));
+    Serial.print("len: ");
+    Serial.println(readFIFO(0x00));
+    writeSPI(TXRX_FIFO, 0x55);
+    Serial.print("addr: 0x");
+    Serial.println(readFIFO(0x01), HEX);
+
+    for(uint32_t i=0; ((i<len) && (i<125)); i++)
     {
-      writeSPI(TXRX_FIFO, payload[i]);
+      writeSPI(TXRX_FIFO, payload[index++]);
       Serial.print("payload");
       Serial.print(i);
       Serial.print(": ");
       Serial.println(readFIFO(i+2));
+      // Serial.println((i<len));
+      // Serial.println((i<126));
+      // Serial.println((i<len) || (i<126));
     }
+    len-=124;
+    Serial.println(len);
     strobeSPI(STX);
-  // }
-  // else if(len > 126)
-  // {
-  //   uint32_t index = 0;
+    // Serial.println(marcstate(), BIN);
+    // delay(100);
+    // Serial.println(marcstate(), BIN);
+    // delay(10);
+    // Serial.println(marcstate(), BIN);
+    Serial.println(ret);
+    ret = waitIDLEorTXFIFOERROR(ret, waitTime);
+    Serial.println(ret);
+    ret = FIFOFlush();
+    delay(3000);
+  }
 
-  //   for(uint32_t i=0; i<126; i++)
-  //     {
-  //       writeSPI(TXRX_FIFO, payload[index++]);
-  //       Serial.print("payload");
-  //       Serial.print(i);
-  //       Serial.print(": ");
-  //       Serial.println(readFIFO(i+2));
-  //     }
-    
-  //   len -= 126;
-  //   Serial.println(len);
+  // Serial.println(marcstate(), BIN);
 
-  //   strobeSPI(STX);
+  // delay(100);
 
-  //   Serial.println(readExtAddrSPI(NUM_TXBYTES));
-  //   delay(10);
-  //   Serial.println(readExtAddrSPI(NUM_TXBYTES));
+  // Serial.println(marcstate(), BIN);
 
-  //   while(true)
-  //   {
-  //     Serial.println(readExtAddrSPI(NUM_TXBYTES));
-  //     Serial.println(marcstate(), BIN);
-  //     Serial.println(len);
-  //     if(readExtAddrSPI(NUM_TXBYTES) > 64)
-  //     {
-  //       Serial.println("DA");
-  //       if(len>0){
-  //         writeSPI(TXRX_FIFO, payload[index++]);
-  //         len--;
-  //       }
-  //       else{
-  //         break;
-  //       }
-  //     }
-  //   }
+  // delay(1000);
 
-  // }
+  // Serial.println(marcstate(), BIN);
 
-  Serial.println(marcstate(), BIN);
-
-  delay(100);
-
-  Serial.println(marcstate(), BIN);
-
-  delay(1000);
-
-  Serial.println(marcstate(), BIN);
-
-  ret = waitTXFIFOERROR(ret, waitTime);
+  // ret = waitTXFIFOERROR(ret, waitTime);
 
   // strobeSPI(SIDLE);
 
   // ret = waitIDLE(ret, waitTime);
 
-  FIFOFlush();
+  ret = FIFOFlush();
   return ret;
 }
 
@@ -346,7 +321,7 @@ void CC1120Class::timerStart(uint32_t time)
 
 bool CC1120Class::timeout()
 {
-  if(timerTime == millis()){
+  if(timerTime < millis()){
     return 1;
   }
   return 0;
@@ -368,6 +343,7 @@ bool CC1120Class::waitIDLE(bool ret, uint32_t time){
 bool CC1120Class::waitRX(bool ret, uint32_t time){
   timerStart(time);
   while(marcstate() != MARCSTATE_RX){
+    delay(1);
     if(timeout()){
       ret = 0;
       break;
@@ -380,10 +356,32 @@ bool CC1120Class::waitTXFIFOERROR(bool ret, uint32_t time){
   Serial.println("waiting TX_FIFO_ERROR");
   timerStart(time);
   while(marcstate() != MARCSTATE_TXFIFOERROR){
+    delay(1);
+    Serial.println("USB hub");
     if(timeout()){
+      Serial.println("timeout!!!");
       ret = 0;
       break;
     }
+  }
+  return ret;
+}
+
+bool CC1120Class::waitIDLEorTXFIFOERROR(bool ret, uint32_t time){
+  timerStart(time);
+  while(true){
+    uint8_t marcstateValue = marcstate();
+    if((marcstateValue == MARCSTATE_IDLE) || (marcstateValue == MARCSTATE_TXFIFOERROR)){
+      break;
+    }
+    
+    if(timeout()){
+      Serial.println("timeout!!!");
+      ret = 0;
+      break;
+    }
+
+    delay(1);
   }
   return ret;
 }

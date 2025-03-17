@@ -105,12 +105,12 @@ void loop() {
       if(RXByte < 1){
         break;
       }
-      Serial.print("CRC check:");
+      // Serial.print("CRC check:");
       if((readExtAddrSPI(LQI_VAL) & 0b10000000) == 0b10000000) {
         CRCCheck = 1;
-        Serial.println("OK!");
+        // Serial.println("OK!");
       }
-      else Serial.println(readExtAddrSPI(LQI_VAL));
+      // else Serial.println(readExtAddrSPI(LQI_VAL));
       RXData = readSPI(0b10111111);  // R/~W[7], Burst[6], RX_FIFO_Address[5:0]
       
       // Serial.print("Received Data:");
@@ -119,6 +119,7 @@ void loop() {
       // readMARCSTATE();
       delay(1);
     }
+    Serial.println();
     if(CRCCheck == 0){
       errorCount++;
     }
@@ -130,7 +131,7 @@ void loop() {
     Serial.print("loop:");
     Serial.println(loopCount);
     Serial.print("error late:");
-    Serial.println(errorCount/loopCount);
+    Serial.println((float) errorCount/loopCount);
 
    
     Serial.print("MARCSTATE after  SRX:  ");
