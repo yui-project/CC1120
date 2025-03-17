@@ -53,6 +53,7 @@ class CC1120Class
     uint8_t marcstate();
     bool    waitIDLE(bool ret, uint32_t time);
     bool    waitRX(bool ret, uint32_t time);
+    bool    waitRXPKT(bool ret, uint32_t time);
     bool    waitTXFIFOERROR(bool ret, uint32_t time);
     bool    waitIDLEorTXFIFOERROR(bool ret, uint32_t time);
     void    reset();

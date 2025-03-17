@@ -161,60 +161,51 @@ bool CC1120Class::RX(uint8_t *data, uint16_t limit=0)
   ret = waitRX(ret, waitTime);
 
   uint8_t RXByte = 0;
-  timerStart(1000);
-  while(RXByte < 1){
-    RXByte = readExtAddrSPI(NUM_RXBYTES);
-    // delay(10);
-    Serial.println(RXByte);
-    if(timeout())
-    {
-      ret = 0;
-      goto END; //go to end of this function
+
+  ret = waitRXPKT(ret, timerTime);
+
+  if(ret == 1){
+    DataLen = readSPI(0b10111111);
+    if(limit != 0){
+      DataLen = limit;
     }
-  }
+    DataAddr = readSPI(0b10111111);
 
-  DataLen = readSPI(0b10111111);
-  if(limit != 0){
-    DataLen = limit;
-  }
-  DataAddr = readSPI(0b10111111);
+    DataLen-=1;
 
-  DataLen-=1;
-
-  // if(DataLen < 127)
-  // {
-    for(int i=0; i<DataLen; i++)
-    {
-      data[i] = readSPI(0b10111111);
-    }
-  // }
-  // else if(DataLen > 127)
-  // {
-  //   uint32_t index = 0;
-  //   while(DataLen > 0)
-  //   {
-  //     if(DataLen >= 127)
-  //     {
-  //       for(int i=0; i<127; i++)
-  //       {
-  //         data[index++] = readSPI(0b10111111);
-  //       }
-  //       DataLen -= 127;
-  //     }
-  //     else if(DataLen < 127)
-  //     {
-  //       for(int i=0; i<DataLen; i++)
-  //       {
-  //         data[index++] = readSPI(0b10111111);
-  //       }
-  //       DataLen = 0;
-  //     }
-  //   }
-  // }
+    // if(DataLen < 127)
+    // {
+      for(int i=0; i<DataLen; i++)
+      {
+        data[i] = readSPI(0b10111111);
+      }
+    // }
+    // else if(DataLen > 127)
+    // {
+    //   uint32_t index = 0;
+    //   while(DataLen > 0)
+    //   {
+    //     if(DataLen >= 127)
+    //     {
+    //       for(int i=0; i<127; i++)
+    //       {
+    //         data[index++] = readSPI(0b10111111);
+    //       }
+    //       DataLen -= 127;
+    //     }
+    //     else if(DataLen < 127)
+    //     {
+    //       for(int i=0; i<DataLen; i++)
+    //       {
+    //         data[index++] = readSPI(0b10111111);
+    //       }
+    //       DataLen = 0;
+    //     }
+    //   }
+    // }
   
-  strobeSPI(SIDLE);
-
-  END:
+    strobeSPI(SIDLE);
+  }
 
   ret = waitIDLE(ret, waitTime);
 
@@ -345,6 +336,20 @@ bool CC1120Class::waitRX(bool ret, uint32_t time){
   while(marcstate() != MARCSTATE_RX){
     delay(1);
     if(timeout()){
+      ret = 0;
+      break;
+    }
+  }
+  return ret;
+}
+
+bool CC1120Class::waitRXPKT(bool ret, uint32_t time){
+  timerStart(time);
+  while(readExtAddrSPI(NUM_RXBYTES) < 1){
+    Serial.println(readExtAddrSPI(NUM_RXBYTES));
+    delay(1);
+    if(timeout()){
+      Serial.println("timeout!!!");
       ret = 0;
       break;
     }

@@ -99,6 +99,7 @@ void loop() {
   // }
   // // index--;
   int randLen = random(126);
+  randLen = 28;
   for(int i=0; i<randLen; i++){
     buffer[i] = (char)random(128);
     index++;
