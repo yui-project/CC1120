@@ -102,19 +102,19 @@ bool CC1120Class::recvUL(uint8_t *recvCommand)
       }
       uint8_t crc[2] = {packet[dataLen-2], packet[dataLen-1]};
       uint8_t endCode = packet[dataLen];
-      Serial.println(endCode, HEX);
+      // Serial.println(endCode, HEX);
       if(endCode != 0x04){
-        Serial.println(ret);
+        // Serial.println(ret);
         ret = 0;
       }
-      recvCommand[0] = startCode;
-      recvCommand[1] = subjectNumber;
+      // recvCommand[0] = startCode;
+      // recvCommand[1] = subjectNumber;
       for(int i=0; i<dataLen-1; i++){
-        recvCommand[i+2] = payload[i];
+        recvCommand[i] = payload[i];
       }
-      recvCommand[dataLen+1] = crc[0];
-      recvCommand[dataLen+2] = crc[1];
-      recvCommand[dataLen+3] = endCode;
+      // recvCommand[dataLen+1] = crc[0];
+      // recvCommand[dataLen+2] = crc[1];
+      // recvCommand[dataLen+3] = endCode;
     }
   }
   // Serial.println(ret);

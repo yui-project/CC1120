@@ -27,9 +27,9 @@ void loop() {
 
   uint8_t data[128];
   ret = CC1120.recvUL(data);
-  Serial.println(ret);
+  // Serial.println(ret);
   if(ret == 1){
-    for(int i=0; i<23; i++) Serial.println((char)data[i]);
+    for(int i=0; i<19; i++) Serial.println((char)data[i]);
   }
   delay(3000);
 }
