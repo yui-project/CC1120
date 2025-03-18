@@ -2,11 +2,13 @@
 #include "stdint.h"
 #include "CC1120.h"
 #include "Decoder.h"
+#include "IoExpander.h"
 // #include "SpiFram.h"
 #include <SPI.h>
 
 SPISettings settings(100000, MSBFIRST, SPI_MODE0);
 Decoder DECODER;
+IoExpander IoEx;
 // SpiFram FRAM;
 
 bool CC1120Class::begin(){
@@ -19,14 +21,27 @@ bool CC1120Class::begin(){
   Serial.println(ret);
 
   pinMode(CC1120_POWER, OUTPUT);
-  pinMode(LoRa_SS_PIN, OUTPUT);
+  pinMode(LoRa_POWER, OUTPUT);
 
   DECODER.init();
 
   DECODER.write(1);
 
+  digitalWrite(CC1120_POWER, HIGH);
+  digitalWrite(LoRa_POWER, HIGH);
+  delay(100);
+
+  IoEx.setPin(15, LOW);
+  IoEx.setPin(13, LOW);
+  delay(100);
+
   digitalWrite(CC1120_POWER, LOW);
-  digitalWrite(LoRa_SS_PIN, HIGH);
+  digitalWrite(LoRa_POWER, LOW);
+  delay(100);
+
+  IoEx.setPin(15, HIGH);
+  IoEx.setPin(13, LOW);
+  delay(100);
 
   // Serial.print("IDLE");
   // Serial.println(ret);
@@ -174,7 +189,7 @@ bool CC1120Class::TX(uint8_t *payload, int32_t len)
     ret = waitIDLEorTXFIFOERROR(ret, waitTime);
     // Serial.println(ret);
     ret = FIFOFlush();
-    delay(3000);
+    // delay(3000);
   }
 
   // Serial.println(marcstate(), BIN);

@@ -11,7 +11,7 @@
 #define CC1120_SERIAL         Serial
 #define CC1120_R_BIT          0x80
 #define CC1120_POWER          20
-#define LoRa_SS_PIN           21
+#define LoRa_POWER            21
 #define DECA_SS_PIN           19
 #define DECB_SS_PIN           25
 #define DECC_SS_PIN           22
@@ -20,8 +20,8 @@
 #define MARCSTATE_RX          0b01101101
 #define MARCSTATE_TXFIFOERROR 0b00010110
 
-#define SOH                   0x02;
-#define EOH                   0x04;
+#define SOH                   0x02
+#define EOH                   0x04
 
 
 

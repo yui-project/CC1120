@@ -12,6 +12,7 @@ void IoExpander::init()
     decoder.init();
     // NOTE: 初期設定ではデコーダは7番をLOWにしている
     decoder.write(DEFALT);
+
     SPI5.begin();
 
     // MCP23S08の初期設定
@@ -50,6 +51,7 @@ void IoExpander::setPin(int pin, int value)
     {
         pin = pin - 8;
         byte gpioState = readIO2(MCP23S08_IODIR);
+        Serial.println(gpioState, BIN);
         if (value == HIGH)
         {
             gpioState |= (1 << pin); // 指定ピンをHIGHに設定
