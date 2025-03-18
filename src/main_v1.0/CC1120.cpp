@@ -73,8 +73,44 @@ bool CC1120Class::sendDL(uint8_t data){
   return ret;
 }
 
-bool CC1120Class::recvUL(uint8_t *cmd){
-  RX(cmd, 28);
+bool CC1120Class::sendDL(uint8_t *data, uint32_t len){
+  bool ret = 1;
+  ret = TX(data, len);
+  return ret;
+}
+
+bool CC1120Class::recvUL(uint8_t *recvCommand)
+{
+  bool ret = 1;
+  uint8_t packet[128];
+  ret = RX(packet);    
+  if (ret == 1);
+  {
+    uint8_t startCode = packet[2];
+    if(startCode == 0x02){
+      uint8_t dataLen = packet[0];
+      uint8_t subjectNumber = packet[3];
+      uint8_t payload[dataLen-1];
+      
+      for(int i=0; i<dataLen-1; i++){
+        payload[i] = packet[i+2];
+      }
+      uint8_t crc[2] = {packet[dataLen-5], packet[dataLen-4]};
+      uint8_t endCode = packet[dataLen-3];
+      if(endCode != 0x04){
+        ret = 0;
+      }
+      recvCommand[0] = startCode;
+      recvCommand[1] = subjectNumber;
+      for(int i=0; i<dataLen-1; i++){
+        recvCommand[i+2] = payload[i];
+      }
+      recvCommand[dataLen+1] = crc[0];
+      recvCommand[dataLen+2] = crc[1];
+      recvCommand[dataLen+3] = endCode;
+    }
+  }
+  return ret;
 }
 
 bool CC1120Class::sendDLfromFram(uint64_t start, uint64_t end){
@@ -148,6 +184,8 @@ bool CC1120Class::TX(uint8_t *payload, int32_t len)
   // ret = waitIDLE(ret, waitTime);
 
   ret = FIFOFlush();
+  strobeSPI(SRX);
+  ret = waitRX(ret, timerTime);
   return ret;
 }
 
@@ -204,7 +242,8 @@ bool CC1120Class::RX(uint8_t *data, uint16_t limit=0)
     //   }
     // }
   
-    strobeSPI(SIDLE);
+    // strobeSPI(SIDLE);
+    return ret;
   }
 
   ret = waitIDLE(ret, waitTime);

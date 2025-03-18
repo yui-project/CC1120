@@ -20,6 +20,9 @@
 #define MARCSTATE_RX          0b01101101
 #define MARCSTATE_TXFIFOERROR 0b00010110
 
+#define SOH                   0x02;
+#define EOH                   0x04;
+
 
 
 class CC1120Class
@@ -30,7 +33,8 @@ class CC1120Class
     bool    setRegister(bool extAddr, uint8_t addr, uint8_t value);
     uint8_t showResister(uint8_t *data);
     bool    sendDL(uint8_t data);
-    bool    recvUL(uint8_t *cmd);
+    bool    sendDL(uint8_t *data, uint32_t len);
+    bool    recvUL(uint8_t *recvCommand);
     bool    sendDLfromFram(uint64_t start, uint64_t end);
     bool    TX(uint8_t *payload, int32_t len);
     bool    RX(uint8_t *data, uint16_t limit=0);
