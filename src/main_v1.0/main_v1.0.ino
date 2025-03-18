@@ -25,10 +25,11 @@ void loop() {
   // Serial.println(ret);
   // delay(5000);
 
-  uint8_t data[28];
-  ret = CC1120.RX(data, 28);
+  uint8_t data[128];
+  ret = CC1120.recvUL(data);
+  Serial.println(ret);
   if(ret == 1){
-    for(int i=0; i<28; i++) Serial.println((char)data[i]);
+    for(int i=0; i<23; i++) Serial.println((char)data[i]);
   }
-  delay(1000);
+  delay(3000);
 }
