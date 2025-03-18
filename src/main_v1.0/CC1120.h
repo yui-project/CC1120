@@ -10,7 +10,7 @@
 #define CC1120_SPI            SPI5
 #define CC1120_SERIAL         Serial
 #define CC1120_R_BIT          0x80
-#define CC1120_SS_PIN         20
+#define CC1120_POWER          20
 #define LoRa_SS_PIN           21
 #define DECA_SS_PIN           19
 #define DECB_SS_PIN           25
@@ -35,12 +35,13 @@ class CC1120Class
     bool    sendDL(uint8_t data);
     bool    sendDL(uint8_t *data, uint32_t len);
     bool    recvUL(uint8_t *recvCommand);
-    bool    sendDLfromFram(uint64_t start, uint64_t end);
+    // bool    sendDLfromFram(uint64_t start, uint64_t end);
     bool    TX(uint8_t *payload, int32_t len);
     bool    RX(uint8_t *data, uint16_t limit=0);
     bool    IDLE();
     bool    setFSK();
     bool    setCW();
+    uint8_t marcstate();
     
 
   private:
@@ -54,7 +55,7 @@ class CC1120Class
     void    timerStart(uint32_t time);
     bool    timeout();
     bool    FIFOFlush();
-    uint8_t marcstate();
+    
     bool    waitIDLE(bool ret, uint32_t time);
     bool    waitRX(bool ret, uint32_t time);
     bool    waitRXPKT(bool ret, uint32_t time);

@@ -1,34 +1,36 @@
 #include "HardwareSerial.h"
 #include "stdint.h"
 #include "CC1120.h"
-#include "SpiFram.h"
+#include "Decoder.h"
+// #include "SpiFram.h"
 #include <SPI.h>
 
 SPISettings settings(100000, MSBFIRST, SPI_MODE0);
-SpiFram FRAM;
+Decoder DECODER;
+// SpiFram FRAM;
 
 bool CC1120Class::begin(){
   bool ret = 1;
   reset();
   // CC1120_SERIAL.begin(9600);
   CC1120_SPI.begin();
+  Serial.println(ret);  
   ret = IDLE();
+  Serial.println(ret);
 
-  pinMode(CC1120_SS_PIN, OUTPUT);
+  pinMode(CC1120_POWER, OUTPUT);
   pinMode(LoRa_SS_PIN, OUTPUT);
-  pinMode(DECA_SS_PIN, OUTPUT);
-  pinMode(DECB_SS_PIN, OUTPUT);
-  pinMode(DECC_SS_PIN, OUTPUT);
-  digitalWrite(CC1120_SS_PIN, HIGH);
-  digitalWrite(LoRa_SS_PIN, HIGH);
-  digitalWrite(DECA_SS_PIN, HIGH);
-  digitalWrite(DECB_SS_PIN, HIGH);
-  digitalWrite(DECC_SS_PIN, HIGH);
 
-  digitalWrite(CC1120_SS_PIN, HIGH);
+  DECODER.init();
+
+  DECODER.write(1);
+
+  digitalWrite(CC1120_POWER, LOW);
+  digitalWrite(LoRa_SS_PIN, HIGH);
 
   // Serial.print("IDLE");
   // Serial.println(ret);
+  Serial.println(ret);
   ret = setFSK();
   Serial.println("FSK");
   return ret;
@@ -121,16 +123,16 @@ bool CC1120Class::recvUL(uint8_t *recvCommand)
   return ret;
 }
 
-bool CC1120Class::sendDLfromFram(uint64_t start, uint64_t end){
-  uint64_t len = end-start+1;
-  uint8_t payload[len];
-  FRAM.begin();
-  for(uint64_t i=0; i<=len; i++){
-    payload[i] = (uint8_t)FRAM.read(start+i);
-  }
-  begin();
-  TX(payload, len);
-}
+// bool CC1120Class::sendDLfromFram(uint64_t start, uint64_t end){
+//   uint64_t len = end-start+1;
+//   uint8_t payload[len];
+//   FRAM.begin();
+//   for(uint64_t i=0; i<=len; i++){
+//     payload[i] = (uint8_t)FRAM.read(start+i);
+//   }
+//   begin();
+//   TX(payload, len);
+// }
 
 bool CC1120Class::TX(uint8_t *payload, int32_t len)
 {
@@ -143,19 +145,19 @@ bool CC1120Class::TX(uint8_t *payload, int32_t len)
 
   while(len>0){
     writeSPI(TXRX_FIFO, (uint8_t) min(len, 125));
-    Serial.print("len: ");
-    Serial.println(readFIFO(0x00));
-    writeSPI(TXRX_FIFO, 0x55);
-    Serial.print("addr: 0x");
-    Serial.println(readFIFO(0x01), HEX);
+    // Serial.print("len: ");
+    // Serial.println(readFIFO(0x00));
+    // writeSPI(TXRX_FIFO, 0x55);
+    // Serial.print("addr: 0x");
+    // Serial.println(readFIFO(0x01), HEX);
 
     for(uint32_t i=0; ((i<len) && (i<125)); i++)
     {
       writeSPI(TXRX_FIFO, payload[index++]);
-      Serial.print("payload");
-      Serial.print(i);
-      Serial.print(": ");
-      Serial.println(readFIFO(i+2));
+      // Serial.print("payload");
+      // Serial.print(i);
+      // Serial.print(": ");
+      // Serial.println(readFIFO(i+2));
       // Serial.println((i<len));
       // Serial.println((i<126));
       // Serial.println((i<len) || (i<126));
@@ -168,9 +170,9 @@ bool CC1120Class::TX(uint8_t *payload, int32_t len)
     // Serial.println(marcstate(), BIN);
     // delay(10);
     // Serial.println(marcstate(), BIN);
-    Serial.println(ret);
+    // Serial.println(ret);
     ret = waitIDLEorTXFIFOERROR(ret, waitTime);
-    Serial.println(ret);
+    // Serial.println(ret);
     ret = FIFOFlush();
     delay(3000);
   }
@@ -284,31 +286,31 @@ bool CC1120Class::RX(uint8_t *data, uint16_t limit=0)
 
 
 uint8_t CC1120Class::readSPI(uint8_t addr) {
-  Serial.println("reading SPI");
+  // Serial.println("reading SPI");
   CC1120_SPI.beginTransaction(settings);
-  digitalWrite(CC1120_SS_PIN, LOW);
+  DECODER.write(1);
   CC1120_SPI.transfer(CC1120_R_BIT | addr);
   uint8_t v = CC1120_SPI.transfer(0x00);
-  digitalWrite(CC1120_SS_PIN, HIGH);
+  DECODER.write(7);
   CC1120_SPI.endTransaction();
   return v;
 }
  
 void CC1120Class::writeSPI(uint8_t addr, uint8_t value) {
   CC1120_SPI.beginTransaction(settings);
-  digitalWrite(CC1120_SS_PIN, LOW);
+  DECODER.write(1);
   CC1120_SPI.transfer(addr);
   CC1120_SPI.transfer(value);
-  digitalWrite(CC1120_SS_PIN, HIGH);
+  DECODER.write(7);
   CC1120_SPI.endTransaction();
 }
  
 void CC1120Class::strobeSPI(uint8_t cmd)
 {
   CC1120_SPI.beginTransaction(settings);
-  digitalWrite(CC1120_SS_PIN, LOW);
+  DECODER.write(1);
   CC1120_SPI.transfer(CC1120_R_BIT | cmd);
-  digitalWrite(CC1120_SS_PIN, HIGH);
+  DECODER.write(7);
   CC1120_SPI.endTransaction();
 }
  
@@ -316,13 +318,13 @@ uint8_t CC1120Class::readExtAddrSPI(uint8_t addr) {
   CC1120_SPI.beginTransaction(settings);
   static uint8_t v;
   // CC1120_SPI.beginTransaction(settings);
-  digitalWrite(CC1120_SS_PIN, LOW);
+  DECODER.write(1);
   CC1120_SPI.transfer(CC1120_R_BIT | EXT_ADDR);
   CC1120_SPI.transfer(addr);
   delayMicroseconds(10);
   v = CC1120_SPI.transfer(0xff);
   // Serial.println(CC1120_SPI.transfer(0xff), BIN);
-  digitalWrite(CC1120_SS_PIN, HIGH);
+  DECODER.write(7);
   CC1120_SPI.endTransaction();
   return v;
 }
@@ -330,11 +332,11 @@ uint8_t CC1120Class::readExtAddrSPI(uint8_t addr) {
 void CC1120Class::writeExtAddrSPI(uint8_t addr, uint8_t value) {
   CC1120_SPI.beginTransaction(settings);
   int v;
-  digitalWrite(CC1120_SS_PIN, LOW);
+  DECODER.write(1);
   v = CC1120_SPI.transfer(EXT_ADDR);
   v = CC1120_SPI.transfer(addr);
   v = CC1120_SPI.transfer(value);
-  digitalWrite(CC1120_SS_PIN, HIGH);
+  DECODER.write(7);
   CC1120_SPI.endTransaction();
 }
 
@@ -342,13 +344,13 @@ uint8_t CC1120Class::readFIFO(uint8_t addr){
   CC1120_SPI.beginTransaction(settings);
   static uint8_t v;
   // CC1120_SPI.beginTransaction(settings);
-  digitalWrite(CC1120_SS_PIN, LOW);
+  DECODER.write(1);
   CC1120_SPI.transfer(0b10111110);
   CC1120_SPI.transfer(addr);
   delayMicroseconds(10);
   v = CC1120_SPI.transfer(0xff);
   // Serial.println(CC1120_SPI.transfer(0xff), BIN);
-  digitalWrite(CC1120_SS_PIN, HIGH);
+  DECODER.write(7);
   CC1120_SPI.endTransaction();
   return v;
 }
@@ -356,11 +358,11 @@ uint8_t CC1120Class::readFIFO(uint8_t addr){
 void CC1120Class::writeFIFO(uint8_t addr, uint8_t value){
   CC1120_SPI.beginTransaction(settings);
   int v;
-  digitalWrite(CC1120_SS_PIN, LOW);
+  DECODER.write(1);
   v = CC1120_SPI.transfer(0b10111110);
   v = CC1120_SPI.transfer(addr);
   v = CC1120_SPI.transfer(value);
-  digitalWrite(CC1120_SS_PIN, HIGH);
+  DECODER.write(7);
   CC1120_SPI.endTransaction();
 }
 
@@ -405,7 +407,7 @@ bool CC1120Class::waitRX(bool ret, uint32_t time){
 bool CC1120Class::waitRXPKT(bool ret, uint32_t time){
   timerStart(time);
   while(readExtAddrSPI(NUM_RXBYTES) < 1){
-    Serial.println(readExtAddrSPI(NUM_RXBYTES));
+    // Serial.println(readExtAddrSPI(NUM_RXBYTES));
     delay(10);
     if(timeout()){
       Serial.println("timeout!!!");
@@ -469,13 +471,13 @@ uint8_t CC1120Class::marcstate(){
 
 void CC1120Class::reset(){
   CC1120_SPI.beginTransaction(settings);
-  digitalWrite(CC1120_SS_PIN, LOW);
+  DECODER.write(1);
   CC1120_SPI.transfer(SRES);
   delay(1);
   while(digitalRead(17) == 1){
     delay(1);
   }
-  digitalWrite(CC1120_SS_PIN, HIGH);
+  DECODER.write(7);
   CC1120_SPI.endTransaction();
 }
 

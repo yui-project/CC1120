@@ -1,5 +1,6 @@
 #include <SPI.h>
 #include "CC1120_addr.h"
+#include "IoExpander.h"
  
 #define CC1120_R_BIT           0x80
 #define CC1120_SS_PIN          20
@@ -7,6 +8,8 @@
 #define DECA_PIN        19
 #define DECB_PIN        25
 #define DECC_PIN        22
+
+IoExpander IE;
  
 uint8_t w;
 uint32_t freq;
@@ -54,6 +57,8 @@ void setup() {
   configureCC1120_2nd();
   Serial.print("MARCSTATE after  first cfg: ");
   readMARCSTATE();
+
+  
 }
  
 void loop() {
