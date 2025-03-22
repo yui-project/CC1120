@@ -160,19 +160,19 @@ bool CC1120Class::TX(uint8_t *payload, int32_t len)
 
   while(len>0){
     writeSPI(TXRX_FIFO, (uint8_t) min(len, 125));
-    // Serial.print("len: ");
-    // Serial.println(readFIFO(0x00));
-    // writeSPI(TXRX_FIFO, 0x55);
-    // Serial.print("addr: 0x");
-    // Serial.println(readFIFO(0x01), HEX);
+    Serial.print("len: ");
+    Serial.println(readFIFO(0x00));
+    writeSPI(TXRX_FIFO, 0x55);
+    Serial.print("addr: 0x");
+    Serial.println(readFIFO(0x01), HEX);
 
     for(uint32_t i=0; ((i<len) && (i<125)); i++)
     {
       writeSPI(TXRX_FIFO, payload[index++]);
-      // Serial.print("payload");
-      // Serial.print(i);
-      // Serial.print(": ");
-      // Serial.println(readFIFO(i+2));
+      Serial.print("payload");
+      Serial.print(i);
+      Serial.print(": ");
+      Serial.println(readFIFO(i+2));
       // Serial.println((i<len));
       // Serial.println((i<126));
       // Serial.println((i<len) || (i<126));
@@ -189,7 +189,7 @@ bool CC1120Class::TX(uint8_t *payload, int32_t len)
     ret = waitIDLEorTXFIFOERROR(ret, waitTime);
     // Serial.println(ret);
     ret = FIFOFlush();
-    // delay(3000);
+    delay(5000);
   }
 
   // Serial.println(marcstate(), BIN);

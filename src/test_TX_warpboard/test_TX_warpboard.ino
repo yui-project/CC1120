@@ -14,7 +14,7 @@ uint32_t freq;
 struct cc_status {
  uint8_t res : 4;
  uint8_t state : 3;
- uint8_t chip_ready : 1;
+//  uint8_t chip_ready : 1;
 };
 union cc_st {
   struct cc_status ccst;                                                                                                                                                                                                                     
