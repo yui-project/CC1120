@@ -138,6 +138,19 @@ bool CC1120Class::recvUL(uint8_t *recvCommand)
   return ret;
 }
 
+bool CC1120Class::setFREQ(bool FREQ){
+  if(FREQ == 0){
+    setRegister(1, 0x0C, 0x6D);  
+    setRegister(1, 0x0D, 0x43);  
+    setRegister(1, 0x0E, 0x33);  
+  }
+  else{
+    setRegister(1, 0x0C, 0x6D);  
+    setRegister(1, 0x0D, 0x43);  
+    setRegister(1, 0x0E, 0x33); 
+  }
+}
+
 // bool CC1120Class::sendDLfromFram(uint64_t start, uint64_t end){
 //   uint64_t len = end-start+1;
 //   uint8_t payload[len];
@@ -189,6 +202,14 @@ bool CC1120Class::TX(uint8_t *payload, int32_t len)
     ret = waitIDLEorTXFIFOERROR(ret, waitTime);
     // Serial.println(ret);
     ret = FIFOFlush();
+
+    int8_t RXByte;
+    RXByte = readExtAddrSPI(NUM_RXBYTES);
+    if(RXByte > 4){
+      ret = 0;
+      break;
+      // Serial.println(RXByte);
+    }
     delay(3000);
   }
 
