@@ -85,30 +85,30 @@ void loop() {
  
   char buffer[128] = "aaariwarano narihira. ariwarano narihira. ariwarano narihira. ariwarano narihira. ariwarano narihira. ariwarano narihira. ariwarano narihira. ariwarano narihira.";
   int index = 2;
-  // while (Serial.available() == 0){
-  //   delay(10);
-  // }
-  // while (Serial.available()>0) {
-  //   buffer[index] = Serial.read();
-  //   index++;
-  //   delay(10);
-  //   //バッファ以上の場合は中断
-  //   // if (index >= 128) {
-  //   //   break;
-  //   // }
-  // }
-  // // index--;
-  int randLen = random(126);
-  randLen = 19;
-  for(int i=0; i<randLen; i++){
-    // buffer[i] = (char)random(128);
-    index++;
+  while (Serial.available() == 0){
+    delay(10);
   }
+  while (Serial.available()>0) {
+    buffer[index] = Serial.read();
+    index++;
+    delay(10);
+    //バッファ以上の場合は中断
+    // if (index >= 128) {
+    //   break;
+    // }
+  }
+  // index--;
+  // int randLen = random(126);
+  // randLen = 19;
+  // for(int i=0; i<randLen; i++){
+  //   // buffer[i] = (char)random(128);
+  //   index++;
+  // }
 
   buffer[0] = index-1;
   buffer[1] = 0x55;
   buffer[2] = 0x02;
-  buffer[20] = 0x04;
+  buffer[index] = 0x04;
 
   for(int i=0; i<1; i++){
     FIFOFlush();
