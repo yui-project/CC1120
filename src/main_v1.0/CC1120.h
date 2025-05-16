@@ -35,7 +35,8 @@ class CC1120Class
     bool    sendDL(uint8_t data);
     bool    sendDL(uint8_t *data, uint32_t len);
     bool    recvUL(uint8_t *recvCommand);
-    bool    setFREQ(bool FREQ);
+    bool    setFREQ(uint8_t FREQ);
+    bool    setPWR(uint8_t PWR);
     // bool    sendDLfromFram(uint64_t start, uint64_t end);
     bool    TX(uint8_t *payload, int32_t len);
     bool    RX(uint8_t *data, uint16_t limit=0);
@@ -310,7 +311,7 @@ class CC1120Class
 #define CW_PKT_CFG0_VALUE          0x20
 #define CW_RFEND_CFG1_VALUE        0x0F
 #define CW_RFEND_CFG0_VALUE        0x00
-#define CW_PA_CFG2_VALUE           0x7C
+#define CW_PA_CFG2_VALUE           0x7F
 #define CW_PA_CFG1_VALUE           0x56
 #define CW_PA_CFG0_VALUE           0x7D
 #define CW_PKT_LEN_VALUE           0xFF

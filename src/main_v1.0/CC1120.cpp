@@ -138,18 +138,46 @@ bool CC1120Class::recvUL(uint8_t *recvCommand)
   return ret;
 }
 
-bool CC1120Class::setFREQ(bool FREQ){
+bool CC1120Class::setFREQ(uint8_t FREQ){
+  bool ret = 1;
   if(FREQ == 0){
     setRegister(1, 0x0C, 0x6D);  
     setRegister(1, 0x0D, 0x43);  
     setRegister(1, 0x0E, 0x33);  
   }
-  else{
+  if(FREQ == 1){
+    setRegister(1, 0x0C, 0x6C);  
+    setRegister(1, 0x0D, 0xC0);  
+    setRegister(1, 0x0E, 0x00);  
+  }
+  if(FREQ == 2){
     setRegister(1, 0x0C, 0x6D);  
-    setRegister(1, 0x0D, 0x43);  
+    setRegister(1, 0x0D, 0x5B);  
     setRegister(1, 0x0E, 0x33); 
   }
+  ret = calibration();
+  return ret;
 }
+
+bool CC1120Class::setPWR(uint8_t PWR){
+  bool ret = 1;
+  if(PWR == 3){
+    setRegister(0, 0x2B, 0x43);   
+  }
+  if(PWR == 2){
+    setRegister(0, 0x2B, 0x7F);   
+  }
+  if(PWR == 1){
+    setRegister(0, 0x2B, 0x74);   
+  }
+  if(PWR == 0){
+    setRegister(0, 0x2B, 0x69);  
+  }
+  ret = calibration();
+  return ret;
+}
+
+
 
 // bool CC1120Class::sendDLfromFram(uint64_t start, uint64_t end){
 //   uint64_t len = end-start+1;
