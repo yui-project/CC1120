@@ -11,6 +11,9 @@ Decoder DECODER;
 IoExpander IoEx;
 // SpiFram FRAM;
 
+
+/// CC1120の初期化
+/// @return エラーコード(0は異常、1は正常)
 bool CC1120Class::begin(){
   bool ret = 1;
   reset();
@@ -162,16 +165,16 @@ bool CC1120Class::setFREQ(uint8_t FREQ){
 bool CC1120Class::setPWR(uint8_t PWR){
   bool ret = 1;
   if(PWR == 3){
-    setRegister(0, 0x2B, 0x43);   
+    setRegister(0, 0x2B, 0x7F);   // 15dBm
   }
   if(PWR == 2){
-    setRegister(0, 0x2B, 0x7F);   
+    setRegister(0, 0x2B, 0x74);   // 10dBm
   }
   if(PWR == 1){
-    setRegister(0, 0x2B, 0x74);   
+    setRegister(0, 0x2B, 0x69);  // 5dBm
   }
   if(PWR == 0){
-    setRegister(0, 0x2B, 0x69);  
+    setRegister(0, 0x2B, 0x43);   // -11dBm
   }
   ret = calibration();
   return ret;
