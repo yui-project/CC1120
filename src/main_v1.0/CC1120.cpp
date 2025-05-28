@@ -74,8 +74,23 @@ bool CC1120Class::setRegister(bool extAddr, uint8_t addr, uint8_t value){
   return ret;
 }
 
-uint8_t CC1120Class::showResister(uint8_t *data){
-  delay(1);
+uint8_t CC1120Class::showResister(bool extAddr, uint8_t addr){
+  uint8_t val;
+  if(extAddr == 1){
+  readExtAddrSPI(addr);
+  }
+  else{
+  readSPI(addr);
+  }
+  return val;
+}
+
+uint32_t CC1120Class::showRSSI(){
+  uint8_t rssi1 = showResister(1, RSSI1);
+  uint8_t rssi0 = showResister(1, RSSI0);
+
+  uint32_t rssi = (rssi1 << 4) + (rssi0 & 0b01111000);
+  return rssi*0.0625-128;
 }
 
 bool CC1120Class::IDLE(){

@@ -189,7 +189,7 @@ void CommunicationDevice::switchMode(bool sendOrRecv, uint8_t whichRadio)
             delay(100);
             ex.setPin(FRONT_END_EN, HIGH);
             delay(100);
-            ex.setPin(FRONT_END_BYP, HIGH);
+            ex.setPin(FRONT_END_BYP, LOW);
             delay(100);
             ex.setPin(RF_SWITCH_2_CTRL, LOW);
             delay(100); // NOTE: 元々は10msだったが、それではフロントエンドICのピン切り替えが正常に行われていなかったため、20msに変更（動作確認済み）

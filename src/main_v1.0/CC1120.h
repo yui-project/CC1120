@@ -31,7 +31,8 @@ class CC1120Class
     bool    begin();
     bool    calibration();
     bool    setRegister(bool extAddr, uint8_t addr, uint8_t value);
-    uint8_t showResister(uint8_t *data);
+    uint8_t showResister(bool extAddr, uint8_t addr);
+    uint32_t showRSSI();
     bool    sendDL(uint8_t data);
     bool    sendDL(uint8_t *data, uint32_t len);
     bool    recvUL(uint8_t *recvCommand);
