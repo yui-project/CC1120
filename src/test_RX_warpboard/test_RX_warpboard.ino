@@ -93,7 +93,7 @@ void loop() {
     while(RXByte < 4){
       RXByte = readExtAddrSPI(NUM_RXBYTES);
       delay(1000);
-      // Serial.println(RXByte);
+      //Serial.println(RXByte);
     }
 
     uint8_t RXData = 1;
