@@ -7,6 +7,8 @@
 #define DECA_PIN        19
 #define DECB_PIN        25
 #define DECC_PIN        22
+#define EXTENDED_ADDR_CMD 0x2F
+#define led1 3
  
 uint8_t w;
 uint32_t freq;
@@ -25,135 +27,29 @@ union cc_st ccstatus;
 SPISettings settings(100000, MSBFIRST, SPI_MODE0);
 uint8_t readExtAddrSPI(uint8_t addr);
 // uint8_t readMARCSTATE();
- 
-void setup() {
-  pinMode(SS_PIN, OUTPUT);
-  pinMode(LoRa_PIN, OUTPUT);
-  pinMode(DECA_PIN, OUTPUT);
-  pinMode(DECB_PIN, OUTPUT);
-  pinMode(DECC_PIN, OUTPUT);
+
+uint8_t readExtendedSPI(uint8_t addr) {
+  uint8_t value;
+
+  SPI.beginTransaction(settings);
+  digitalWrite(SS_PIN, LOW);
+
+  // 1. 拡張レジスタ読み出し用のコマンドを送信
+  //    (R_BIT | EXTENDED_ADDR_CMD = 0x80 | 0x2F = 0xAF)
+  SPI.transfer(R_BIT | EXTENDED_ADDR_CMD);
+
+  // 2. 読み出したい拡張レジスタのアドレスを送信
+  SPI.transfer(addr);
+
+  // 3. ダミーデータ(0x00)を送信して、レジスタの値を受信する
+  value = SPI.transfer(0x00);
+
   digitalWrite(SS_PIN, HIGH);
-  digitalWrite(LoRa_PIN, HIGH);
-  digitalWrite(DECA_PIN, HIGH);
-  digitalWrite(DECB_PIN, HIGH);
-  digitalWrite(DECC_PIN, HIGH);
- 
-  Serial.begin(9600);
-  SPI.begin();
- 
+  SPI.endTransaction();
   
-}
- 
-void loop() {
-
-  resetCC1120();
-  delay(1000);
-  strobeSPI(SIDLE); //Exit RX/TX, turn off frequency synthesizer and exit eWOR mode if applicable
-  delay(1000);
- 
-  Serial.println();
-  Serial.print("MARCSTATE before first cfg: ");
-  // Serial.println(readExtAddrSPI(MARCSTATE), BIN);
-  readMARCSTATE();
-  configureCC1120_2nd();
-  Serial.print("MARCSTATE after  first cfg: ");
-  readMARCSTATE();
-
-  Serial.print("MARCSTATE before cfg:  ");
-  readMARCSTATE();
-
-  digitalWrite(SS_PIN, HIGH);
- 
-  Serial.print("MARCSTATE after  cfg:  ");
-  readMARCSTATE();
- 
-  Serial.print("PARTNUMBER: ");
-  Serial.println(readExtAddrSPI(PARTNUMBER), HEX);
- 
-  Serial.print("PARTVERSION: ");
-  Serial.println(readExtAddrSPI(PARTVERSION), HEX);
- 
-  Serial.print("FREQ: ");
-  freq = readExtAddrSPI(FREQ2) << 16 | readExtAddrSPI(FREQ1) << 8 | readExtAddrSPI(FREQ0);
-  Serial.println(freq, HEX);
- 
-  Serial.print("FS_CFG: ");
-  Serial.println(readSPI(FS_CFG), HEX);
- 
-  Serial.print("PA_CFG2: ");
-  Serial.println(readSPI(PA_CFG2), HEX);
- 
-  char buffer[128];
-  int index = 2;
-  // while (Serial.available() == 0){
-  //   delay(10);
-  // }
-  // while (Serial.available()>0) {
-  //   buffer[index] = Serial.read();
-  //   index++;
-  //   delay(10);
-  //   //バッファ以上の場合は中断
-  //   // if (index >= 128) {
-  //   //   break;
-  //   // }
-  // }
-  // // index--;
-  int randLen = random(126);
-  for(int i=0; i<randLen; i++){
-    buffer[i] = (char)random(128);
-    index++;
-  }
-
-  buffer[0] = index-2;
-  buffer[1] = 0x55;
-
-  for(int i=0; i<1; i++){
-    FIFOFlush();
-    
-
-
-    for(uint32_t i=0; i<index; i++){
-      writeSPI(TXRX_FIFO, buffer[i]);
-      Serial.print(buffer[i]);
-
-    }
-
-
-    Serial.println(index);
-    Serial.println(readExtAddrSPI(TXFIRST));
-    Serial.println(readExtAddrSPI(TXLAST));
-    writeExtAddrSPI(TXLAST, index);
-    Serial.println(readExtAddrSPI(TXLAST));
-    Serial.println(readSPI(PKT_LEN));
-    writeSPI(PKT_LEN, index);
-    Serial.println(readSPI(PKT_LEN));
-
-    // for(int i=0; i<128; i++){
-    //   Serial.print(readDirectFIFO(i));
-    // }
-    Serial.print("MARCSTATE before STX:  ");
-    readMARCSTATE();
-   
-    strobeSPI(STX);  // Enable TX
-    delay(1000);
-   
-    Serial.print("MARCSTATE after  STX:  ");
-    readMARCSTATE();
-
-    Serial.println(readExtAddrSPI(TXFIRST), HEX);
-    Serial.println(readExtAddrSPI(TXLAST), HEX);
-   
-    strobeSPI(SIDLE); // Exit TX/RX, turn off frequency synthesizer and exit eWOR mode if applicable
-    
- 
-    delay(1000);
-    Serial.print("MARCSTATE after SIDLE: ");
-    readMARCSTATE();
-  }
+  return value;
 }
 
-
- 
 void readMARCSTATE(){
   uint8_t value = readExtAddrSPI(MARCSTATE);
   uint8_t mask = 0b11111;
@@ -711,4 +607,180 @@ void FIFOFlush(){
   strobeSPI(SFTX); // Flush the TX FIFO
   delay(1);
 }
+
+void setup() {
+  pinMode(SS_PIN, OUTPUT);
+  pinMode(LoRa_PIN, OUTPUT);
+  pinMode(DECA_PIN, OUTPUT);
+  pinMode(DECB_PIN, OUTPUT);
+  pinMode(DECC_PIN, OUTPUT);
+  digitalWrite(SS_PIN, HIGH);
+  digitalWrite(LoRa_PIN, HIGH);
+  digitalWrite(DECA_PIN, HIGH);
+  digitalWrite(DECB_PIN, HIGH);
+  digitalWrite(DECC_PIN, HIGH);
+  pinMode(led1, OUTPUT);
+
+ 
+  Serial.begin(115200);
+  SPI.begin();
+  resetCC1120();
+
+  strobeSPI(SNOP);
+
+  // 2. 保存されたステータスバイトの値を取得
+  uint8_t current_status = ccstatus.v;
+
+  // 3. シリアルモニタに表示
+  Serial.print("現在のステータスバイト: 0x");
+  Serial.println(current_status, HEX);
+ 
+  
+}
+ 
+void loop() {
+Serial.println(readExtendedSPI(0x8F), HEX);
+
+
+//NOTE:以下電波放出の際に使用
+/*
+static uint32_t packetCounter = 0;
+  
+// 1バイトのデータを送信（最小構成）
+uint8_t txBuffer[1]; // 1バイトデータのみ
+
+txBuffer[0] = 0xAA;  // 1バイトのデータ (0xAAを例として使用)
+
+uint8_t totalPacketLength = 1; // 全長 = 1バイトデータのみ
+
+Serial.print("\nSending 1-byte packet ");
+Serial.print(packetCounter);
+Serial.print(" (Data: 0x");
+Serial.print(txBuffer[0], HEX);
+Serial.println(")");
+
+strobeSPI(SIDLE);
+strobeSPI(SFTX);
+
+for (uint8_t i = 0; i < totalPacketLength; i++) {
+  writeSPI(TXRX_FIFO, txBuffer[i]);
+}
+
+strobeSPI(STX);
+
+Serial.println("Transmission finished.");
+packetCounter++;
+*/
+delay(5000);
+
+
+//NOTE:以下もともと存在していたコードなので分からん
+  /*strobeSPI(SIDLE); //Exit RX/TX, turn off frequency synthesizer and exit eWOR mode if applicable
+  delay(1000);
+ 
+  Serial.println();
+  Serial.print("MARCSTATE before first cfg: ");
+  // Serial.println(readExtAddrSPI(MARCSTATE), BIN);
+  readMARCSTATE();
+  configureCC1120_2nd();
+  Serial.print("MARCSTATE after  first cfg: ");
+  readMARCSTATE();
+
+  Serial.print("MARCSTATE before cfg:  ");
+  readMARCSTATE();
+
+  digitalWrite(SS_PIN, HIGH);
+ 
+  Serial.print("MARCSTATE after  cfg:  ");
+  readMARCSTATE();
+ 
+  Serial.print("PARTNUMBER: ");
+  Serial.println(readExtAddrSPI(PARTNUMBER), HEX);
+ 
+  Serial.print("PARTVERSION: ");
+  Serial.println(readExtAddrSPI(PARTVERSION), HEX);
+ 
+  Serial.print("FREQ: ");
+  freq = readExtAddrSPI(FREQ2) << 16 | readExtAddrSPI(FREQ1) << 8 | readExtAddrSPI(FREQ0);
+  Serial.println(freq, HEX);
+ 
+  Serial.print("FS_CFG: ");
+  Serial.println(readSPI(FS_CFG), HEX);
+ 
+  Serial.print("PA_CFG2: ");
+  Serial.println(readSPI(PA_CFG2), HEX);
+ 
+  char buffer[128];
+  int index = 2;
+  // while (Serial.available() == 0){
+  //   delay(10);
+  // }
+  // while (Serial.available()>0) {
+  //   buffer[index] = Serial.read();
+  //   index++;
+  //   delay(10);
+  //   //バッファ以上の場合は中断
+  //   // if (index >= 128) {
+  //   //   break;
+  //   // }
+  // }
+  // // index--;
+  int randLen = random(126);
+  for(int i=0; i<randLen; i++){
+    buffer[i] = (char)random(128);
+    index++;
+  }
+
+  buffer[0] = index-2;
+  buffer[1] = 0x55;
+
+  for(int i=0; i<1; i++){
+    FIFOFlush();
+    
+
+
+    for(uint32_t i=0; i<index; i++){
+      writeSPI(TXRX_FIFO, buffer[i]);
+      Serial.print(buffer[i]);
+
+    }
+
+
+    Serial.println(index);
+    Serial.println(readExtAddrSPI(TXFIRST));
+    Serial.println(readExtAddrSPI(TXLAST));
+    writeExtAddrSPI(TXLAST, index);
+    Serial.println(readExtAddrSPI(TXLAST));
+    Serial.println(readSPI(PKT_LEN));
+    writeSPI(PKT_LEN, index);
+    Serial.println(readSPI(PKT_LEN));
+
+    // for(int i=0; i<128; i++){
+    //   Serial.print(readDirectFIFO(i));
+    // }
+    Serial.print("MARCSTATE before STX:  ");
+    readMARCSTATE();
+   
+    strobeSPI(STX);  // Enable TX
+    delay(1000);
+   
+    Serial.print("MARCSTATE after  STX:  ");
+    readMARCSTATE();
+
+    Serial.println(readExtAddrSPI(TXFIRST), HEX);
+    Serial.println(readExtAddrSPI(TXLAST), HEX);
+   
+    strobeSPI(SIDLE); // Exit TX/RX, turn off frequency synthesizer and exit eWOR mode if applicable
+    
+ 
+    delay(1000);
+    Serial.print("MARCSTATE after SIDLE: ");
+    readMARCSTATE();
+  }
+    */
+}
+
+
+ 
+
  
